@@ -1,0 +1,37 @@
+{
+  "dependencies": [
+    "eigen3",
+    "glfw3",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding"
+      ]
+    },
+    "nativefiledialog-extended",
+    "fmt"
+  ],
+  "overrides": [
+    {
+      "name": "eigen3",
+      "version": "3.4.0"
+    },
+    {
+      "name": "imgui",
+      "version": "1.91.0"
+    },
+    {
+      "name": "glfw3",
+      "version": "3.4"
+    },
+    {
+      "name": "nativefiledialog-extended",
+      "version": "1.2.0"
+    },
+    {
+      "name": "fmt",
+      "version": "11.0.2"
+    }
+  ],
+  "builtin-baseline": "85392b146fdbdb1ef68cb3bfd48e9ee9a6311064"
+}

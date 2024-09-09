@@ -1,0 +1,10 @@
+build/
+package/
+imgui.ini
+**/handout/*.log
+**/handout/*.aux
+**/handout/*.out
+**/handout/*.pdf
+**/handout/*.synctex.gz
+**/handout/*.bbl
+**/handout/*.blg
