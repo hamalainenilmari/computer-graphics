@@ -241,6 +241,7 @@ void App::render(int window_width, int window_height, vector<string>& vecStatusM
     // YOUR CODE HERE (R1)
     // Set the model space -> world space transform to translate the model according to user input.
     Matrix4f modelToWorld = Matrix4f::Identity();
+    modelToWorld.block<3, 1>(0, 3) = currentTranslation;
 
     // Draw the model with your model-to-world transformation.
     glUniformMatrix4fv(gl_.model_to_world_uniform, 1, GL_FALSE, modelToWorld.data());
@@ -276,6 +277,10 @@ void App::handleKeypress(GLFWwindow * window, int key, int scancode, int action,
             camera_rotation_angle_ -= 0.05 * EIGEN_PI;
         else if (key == GLFW_KEY_END)
             camera_rotation_angle_ += 0.05 * EIGEN_PI;
+        else if (key == GLFW_KEY_PAGE_UP)
+            currentTranslation.y() += 0.05;
+        else if (key == GLFW_KEY_PAGE_DOWN)
+            currentTranslation.y() -= 0.05;
     }
 }
 
@@ -416,9 +421,20 @@ vector<App::Vertex> App::loadGeneratedConeModel()
     for (auto i = 0u; i < faces; ++i) {
         // YOUR CODE HERE (R2)
         // Figure out the correct positions of the three vertices of this face.
-        // v0.position = ...
+        v0.position = Vector3f(
+            cos(angle_increment * i) * radius, // cos for x coordinate on a circle
+            -1.0f,                             // height is the same
+            sin(angle_increment * i) * radius  // sin for y coordinate on a circle
+        );
+        v1.position = Vector3f(
+            cos(angle_increment * (i + 1)) * radius,
+            -1.0f,
+            sin(angle_increment * (i + 1)) * radius
+        );
+        v2.position = Vector3f(0.0f, 0.0f, 0.0f);
         // Calculate the normal of the face from the positions and use it for all vertices.
-        // v0.normal = v1.normal = v2.normal = ...;
+        v0.normal = v1.normal = v2.normal =
+            ((v1.position - v0.position).cross(v2.position - v0.position)).normalized();
         //
         // Some hints:
         // - Try just making a triangle in fixed coordinates at first.

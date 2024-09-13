@@ -107,6 +107,7 @@ private:
 
     // YOUR CODE HERE (R1)
     // Add a class member to store the current translation.
+    Vector3f currentTranslation = Vector3f::Zero();
 
 public:
     // These need to be public, as they're assigned to the GLFW
