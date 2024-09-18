@@ -364,6 +364,13 @@ vector<App::Vertex> App::unpackIndexedData(
         // f[1] is the index of the normal of the first vertex
         // f[2] is the index of the position of the second vertex
         // ...
+        Vertex v0 = Vertex{ positions[f[0]], normals[f[1]] };
+        Vertex v1 = Vertex{ positions[f[2]], normals[f[3]] };
+        Vertex v2 = Vertex{ positions[f[4]], normals[f[5]] };
+        vertices.push_back(v0);
+        vertices.push_back(v1);
+        vertices.push_back(v2);
+    
     }
 
     return vertices;
