@@ -3,9 +3,9 @@
 #
 # Assignment 1: Introduction
 
-Student name:
-Student number:
-Hours spent on requirements (approx.):
+Student name: Ilmari Hämäläinen
+Student number: 894931
+Hours spent on requirements (approx.): 10h
 Hours spent on extra credit (approx.):
 
 # First, some questions about where you come from and how you got started.
@@ -14,25 +14,34 @@ Hours spent on extra credit (approx.):
 # Keep it short; answering shouldn't take you more than 5-10 minutes.
 
 - What are you studying here at Aalto? (Department, major, minor...?)
+    - CCIS, Computer Science, Software Systems and Technologies study track
 
 - Which year of your studies is this?
+    - Second master year
 
 - Is this a mandatory course for you?
+    - no
 
 - Have you had something to do with graphics before? Other studies, personal interests, work?
+    - no
 
 - Do you remember basic linear algebra? Matrix and vector multiplication, cross product, that sort of thing?
+    - not perfectly
 
 - How is your overall programming experience? What language are you most comfortable with?
+    - not very broad: minor in CS in bachelors degree and now 1 full masters degree year.
+    Most used languages are python and JS for me
 
 - Do you have some experience with these things? (If not, do you have experience with something similar such as C or Direct3D?)
-C++:
-C++11 or later:
-OpenGL:
+C++: no, one course in C
+C++11 or later: no
+OpenGL: no
 
 - Have you used a version control system such as Git, Mercurial or Subversion? Which ones?
+    - Git
 
 - Did you work on the assignment using Aalto computers, your own computers, or both?
+    - Own computer
 
 # Which parts of the assignment did you complete? Mark them 'done'.
 # You can also mark non-completed parts as 'attempted' if you spent a fair amount of
@@ -42,10 +51,10 @@ OpenGL:
 (Try to get everything done! Based on previous data, virtually everyone who put in the work and did well in the first two assignments ended up finishing the course, and also reported a high level of satisfaction at the end of the course.)
 
                             opened this file (0p): done
-                         R1 Moving an object (1p): not done
-R2 Generating a simple cone mesh and normals (3p): not done
-  R3 Converting mesh data for OpenGL viewing (3p): not done
-           R4 Loading a large mesh from file (3p): not done
+                         R1 Moving an object (1p): done
+R2 Generating a simple cone mesh and normals (3p): done
+  R3 Converting mesh data for OpenGL viewing (3p): done
+           R4 Loading a large mesh from file (3p): done
 
 # Did you do any extra credit work?
 
@@ -63,3 +72,4 @@ R2 Generating a simple cone mesh and normals (3p): not done
 
 (Was the assignment too long? Too hard? Fun or boring? Did you learn something, or was it a total waste of time? Can we do something differently to help you learn? Please be brutally honest; we won't take it personally.)
 
+This assignment was fun.
