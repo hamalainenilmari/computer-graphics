@@ -559,7 +559,7 @@ vector<App::Vertex> App::loadObjFileModel(string filename)
     ifstream input(filename, ios::in);
 
     // Read the file line by line.
-    string line;
+    string line; 
     while (getline(input, line)) {
         // Replace any '/' characters with spaces ' ' so that all of the
         // values we wish to read are separated with whitespace.
@@ -584,10 +584,19 @@ vector<App::Vertex> App::loadObjFileModel(string filename)
             // Read the three vertex coordinates (x, y, z) into 'v'.
             // Store a copy of 'v' in 'positions'.
             // See std::vector documentation for push_back.
+ 
+            iss >> v.x();
+            iss >> v.y();
+            iss >> v.z();
+            positions.push_back(v);
         }
         else if (s == "vn") { // normal
             // YOUR CODE HERE (R4)
             // Similar to above.
+            iss >> v.x();
+            iss >> v.y();
+            iss >> v.z();
+            normals.push_back(v);
         }
         else if (s == "f") { // face
             // YOUR CODE HERE (R4)
@@ -605,9 +614,29 @@ vector<App::Vertex> App::loadObjFileModel(string filename)
 
             // Note that in C++ we index things starting from 0, but face indices in OBJ format start from 1.
             // If you don't adjust for that, you'll index past the range of your vectors and get a crash.
-
+                
             // It might be a good idea to print the indices to see that they were read correctly.
-            // cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
+            iss >> f[0];
+            iss >> sink;
+            iss >> f[1];
+           
+            iss >> f[2];
+            iss >> sink;
+            iss >> f[3];
+            
+            iss >> f[4];
+            iss >> sink;
+            iss >> f[5];
+            
+            f[0] -= 1;
+            f[1] -= 1;
+            f[2] -= 1;
+            f[3] -= 1;
+            f[4] -= 1;
+            f[5] -= 1;
+            
+            faces.push_back(f);
+            cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
         }
     }
     //common_ctrl_.message(("Loaded mesh from " + filename).c_str());
