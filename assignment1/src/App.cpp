@@ -278,9 +278,17 @@ void App::handleKeypress(GLFWwindow * window, int key, int scancode, int action,
         else if (key == GLFW_KEY_END)
             camera_rotation_angle_ += 0.05 * EIGEN_PI;
         else if (key == GLFW_KEY_PAGE_UP)
-            currentTranslation.y() += 0.05;
+            currentTranslation.z() += 0.05;
         else if (key == GLFW_KEY_PAGE_DOWN)
+            currentTranslation.z() -= 0.05;
+        else if (key == GLFW_KEY_UP)
+            currentTranslation.y() += 0.05;
+        else if (key == GLFW_KEY_DOWN)
             currentTranslation.y() -= 0.05;
+        else if (key == GLFW_KEY_LEFT)
+            currentTranslation.x() -= 0.05;
+        else if (key == GLFW_KEY_RIGHT)
+            currentTranslation.x() += 0.05;
     }
 }
 
@@ -636,7 +644,7 @@ vector<App::Vertex> App::loadObjFileModel(string filename)
             f[5] -= 1;
             
             faces.push_back(f);
-            cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
+            //cout << f[0] << " " << f[1] << " " << f[2] << " " << f[3] << " " << f[4] << " " << f[5] << endl;
         }
     }
     //common_ctrl_.message(("Loaded mesh from " + filename).c_str());
