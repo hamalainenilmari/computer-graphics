@@ -72,6 +72,7 @@ private:
     void                decreaseUIScale();
     void                setUIScale(float scale);
     float               ui_scale_ = 1.0f;
+    int                 fov_scale = 1;
     bool                font_atlas_dirty_ = false;
 
     static GLFWkeyfun          default_key_callback_;
@@ -96,6 +97,7 @@ private:
     bool				model_changed_;
     bool				shading_toggle_;
     bool				shading_mode_changed_;
+    bool                auto_rotate_ = false;
 
     glGeneratedIndices	gl_;
 
@@ -119,6 +121,7 @@ public:
 
 private:
     void				handleKeypress(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void				rotateCamera();
     void				handleMouseButton(GLFWwindow* window, int button, int action, int mods);
     void				handleMouseMovement(GLFWwindow* window, double xpos, double ypos);
     void				handleDrop(GLFWwindow* window, int count, const char** paths);

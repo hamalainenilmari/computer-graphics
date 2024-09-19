@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <fmt/core.h>
+#include "Timer.h"
 
 //------------------------------------------------------------------------
 
@@ -142,7 +143,6 @@ void App::run()
         int width, height;
         glfwGetFramebufferSize(window_, &width, &height);
         render(width, height, vecStatusMessages);
-
         // Begin GUI window
         ImGui::Begin("Controls");
         // Model switching UI buttons
@@ -157,6 +157,12 @@ void App::run()
         if (ImGui::Button("Load OBJ model (L)"))
             showObjLoadDialog();
         ImGui::Checkbox("Shading mode (S)", &shading_toggle_);
+        ImGui::Checkbox("Auto rotate (R)", &auto_rotate_);
+        // ImGui::SliderInt("Scale object along x-axis", &fov_scale, 0, 10); TODO check this
+
+        if (auto_rotate_) {
+            rotateCamera();
+        }
 
         // Draw the status messages in the current list
         // Note that you can add them from inside render(...)
@@ -289,6 +295,10 @@ void App::handleKeypress(GLFWwindow * window, int key, int scancode, int action,
             currentTranslation.x() -= 0.05;
         else if (key == GLFW_KEY_RIGHT)
             currentTranslation.x() += 0.05;
+        else if (key == GLFW_KEY_R)
+            auto_rotate_ = !auto_rotate_;
+        else if (key == GLFW_KEY_S)
+            shading_toggle_ = !shading_toggle_;
     }
 }
 
@@ -348,6 +358,11 @@ vector<App::Vertex> App::loadExampleModel()
     for (auto const& v : example_data)
         vertices.push_back(v);
     return vertices;
+}
+
+void App::rotateCamera()
+{   
+    camera_rotation_angle_ += 0.0005 * EIGEN_PI;
 }
 
 vector<App::Vertex> App::unpackIndexedData(
