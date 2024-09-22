@@ -6,7 +6,7 @@
 Student name: Ilmari Hämäläinen
 Student number: 894931
 Hours spent on requirements (approx.): 10h
-Hours spent on extra credit (approx.):
+Hours spent on extra credit (approx.): 1h
 
 # First, some questions about where you come from and how you got started.
 # Your answers in this section will be used to improve the course.
@@ -59,6 +59,9 @@ R2 Generating a simple cone mesh and normals (3p): done
 # Did you do any extra credit work?
 
 (Describe what you did and, if there was a substantial amount of work involved, how you did it. Also describe how to use/activate your extra features, if they are interactive.)
+
+    - Version control (1 p), logfile.txt created
+    - Animation (0.5 p), added gui button for automatic rotation
 
 # Are there any known problems/bugs remaining in your code?
 
