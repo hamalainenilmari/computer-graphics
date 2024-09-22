@@ -362,7 +362,7 @@ vector<App::Vertex> App::loadExampleModel()
 
 void App::rotateCamera()
 {   
-    camera_rotation_angle_ += 0.0005 * EIGEN_PI;
+    camera_rotation_angle_ += 0.0002 * EIGEN_PI;
 }
 
 vector<App::Vertex> App::unpackIndexedData(
@@ -445,26 +445,29 @@ vector<App::Vertex> App::loadGeneratedConeModel()
 
     Vertex v0(Vertex::Zero());
     Vertex v1(Vertex::Zero());
-    Vertex v2(Vertex::Zero());
+    Vertex v2(Vertex::Zero()); // tip of cone
 
     // Generate one face at a time
     for (auto i = 0u; i < faces; ++i) {
         // YOUR CODE HERE (R2)
         // Figure out the correct positions of the three vertices of this face.
+        float angle0 = angle_increment * i;
         v0.position = Vector3f(
-            cos(angle_increment * i) * radius, // cos for x coordinate on a circle
-            -1.0f,                             // height is the same
-            sin(angle_increment * i) * radius  // sin for y coordinate on a circle
+            cos(angle0) * radius, // cos for x coordinate on a circle
+            -height,                             // height is the same
+            sin(angle0) * radius  // sin for y coordinate on a circle
         );
+        float angle1 = angle_increment * (i + 1);
         v1.position = Vector3f(
-            cos(angle_increment * (i + 1)) * radius,
-            -1.0f,
-            sin(angle_increment * (i + 1)) * radius
+            cos(angle1) * radius,
+            -height,
+            sin(angle1) * radius
         );
         v2.position = Vector3f(0.0f, 0.0f, 0.0f);
         // Calculate the normal of the face from the positions and use it for all vertices.
-        v0.normal = v1.normal = v2.normal =
-            ((v1.position - v0.position).cross(v2.position - v0.position)).normalized();
+        Vector3f normal = -((v1.position - v0.position).cross(v2.position - v0.position)).normalized();
+        v0.normal = v1.normal = v2.normal = normal;
+            
         //
         // Some hints:
         // - Try just making a triangle in fixed coordinates at first.
@@ -476,7 +479,7 @@ vector<App::Vertex> App::loadGeneratedConeModel()
         // Then we add the vertices to the array.
         // .push_back() grows the size of the vector by one, copies its argument,
         // and places the copy at the back of the vector.
-        vertices.push_back(v0); vertices.push_back(v1); vertices.push_back(v2);
+        vertices.push_back(v2); vertices.push_back(v0); vertices.push_back(v1);
     }
     return vertices;
 }
