@@ -5,7 +5,7 @@
 //#include "im3d_example.h"
 // Include libraries
 #include "glad/gl_core_33.h"                // OpenGL
-#include "Im3d.h"
+#include "im3d.h"
 #include <fmt/core.h>
 #include "Utils.h"
 
@@ -389,7 +389,7 @@ GLuint LoadCompileShader(GLenum _stage, const char* _path, const char* _defines)
 		glAssert(glGetShaderiv(ret, GL_INFO_LOG_LENGTH, &len));
 		char* log = new GLchar[len];
 		glAssert(glGetShaderInfoLog(ret, len, 0, log));
-		fprintf(stderr, log);
+		fprintf(stderr, "%s", log);
 		delete[] log;
 
 		//fprintf(stderr, "\n\n%s", src.data());
@@ -416,7 +416,7 @@ bool LinkShaderProgram(GLuint _handle)
 		glAssert(glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &len));
 		GLchar* log = new GLchar[len];
 		glAssert(glGetProgramInfoLog(_handle, len, 0, log));
-		fprintf(stderr, log);
+		fprintf(stderr, "%s", log);
 		fprintf(stderr, "\n");
 		delete[] log;
 

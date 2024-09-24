@@ -59,6 +59,13 @@ App::~App()
 
 void App::run()
 {
+    // Warn about cwd problems
+    filesystem::path cwd = filesystem::current_path();
+    if (!filesystem::is_directory(cwd/"assets")) {
+        cout << fmt::format("Current working directory \"{}\" does not contain an \"assets\" folder.\n", cwd.string())
+             << "Make sure the executable gets run relative to the project root.\n";
+    }
+    
     // Initialize GLFW
     if (!glfwInit()) {
         fail("glfwInit() failed");

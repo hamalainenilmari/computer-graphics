@@ -7,13 +7,10 @@
 #include <imgui.h>                  // GUI Library
 #include <imgui_impl_glfw.h>
 #include "imgui_impl_opengl3.h"
-// This is a precaution we take against accidental misuses of the Eigen library,
-// as documented here: https://eigen.tuxfamily.org/dox-devel/group__TopicPassingByValue.html 
-// Disabling vectorization this way *should* make careless code work,
-// but it's better really not to ever pass Eigen objects by value.
-#define EIGEN_MAX_STATIC_ALIGN_BYTES 0
+
 #include <Eigen/Dense>              // Linear algebra
 #include <Eigen/Geometry>
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -59,8 +56,8 @@ public:
     void				run();
 
 private:
-                        App(const App&) {}                      // forbidden
-                        App& operator=       (const App&) {}    // forbidden
+                        App(const App&) = delete; // forbidden
+                        App& operator=(const App&) = delete; // forbidden
 
     void render(int window_width, int window_height, vector<string>& vecStatusMessages);
 
