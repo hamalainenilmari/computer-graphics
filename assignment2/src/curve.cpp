@@ -69,15 +69,37 @@ void tessellateCubicSplineSegment(	const Vector3f& p0,
 	// If you implement those, it's simplest to just add
 	// those members to CurvePoint.
 
-	Matrix4f G;
+	Matrix4f G{
+		{ p0[0], p1[0], p2[0], p3[0] },
+		{ p0[1], p1[1], p2[1], p3[1] },
+		{ p0[2], p1[2], p2[2], p3[2] },
+		{ 1.0f, 1.0f, 1.0f, 1.0f }  // Homogeneous coordinate
+	};
 	// Fill in as shown on lecture slides.
 
-	unsigned pts_to_add = 0;  // replace with correct value
+	unsigned pts_to_add = num_intervals + (include_last_point ? 1 : 0);  // replace with correct value
 
 	for (unsigned i = 0; i < pts_to_add; ++i)
-	{
+	{	
+		if (i == pts_to_add - 1) {
+			if (!include_last_point) {
+				continue;
+			};
+		};
 		float t = float(i) / num_intervals;
-		// ...
+		/*float pt_x = ((1 - t) * (1 - t) * (1 - t)) * p0[0] +
+			(3 * t * ((1 - t) * (1 - t)) * p1[0]) + 
+			((3 * t * t * (1 - t)) * p2[0]) + 
+			(t * t * t * p3[0]);
+		float pt_y = ((1 - t) * (1 - t) * (1 - t)) * p0[1] +
+			(3 * t * ((1 - t) * (1 - t)) * p1[1]) +
+			((3 * t * t * (1 - t)) * p2[1]) +
+			(t * t * t * p3[1]);
+		*/
+		CurvePoint p;
+		Vector4f point = G * (B * Vector4f{ 1.0f, t, t * t, t * t * t });
+		p.position = Vector3f(point[0], point[1], point[2]);
+		dest.push_back(p);
 	}
 
 }    
@@ -101,6 +123,12 @@ void tessellateBezier(const vector<Vector3f>& P, vector<CurvePoint>& dest, unsig
     // The input "num_intervals" controls the number of points to
 	// generate on each piece of the spline, as per the instructions
 	// for tessellateCubicSplineSegment(...).
+
+	for (unsigned i = 0; i < P.size() - 3 ; ++i) {
+		bool include_last = (i == P.size() - 4);
+
+		tessellateCubicSplineSegment(P[i], P[i+1], P[i+2], P[i+3], num_intervals, include_last, B_Bezier, dest);
+	}
 
 	// EXTRA CREDIT NOTE:
     // Also compute the other Vector3fs for each CurvePoint: T, N, B.
