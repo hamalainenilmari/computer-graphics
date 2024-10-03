@@ -68,12 +68,11 @@ void tessellateCubicSplineSegment(	const Vector3f& p0,
 	// and possibly other frame vectors along the spline.
 	// If you implement those, it's simplest to just add
 	// those members to CurvePoint.
-
 	Matrix4f G{
 		{ p0[0], p1[0], p2[0], p3[0] },
 		{ p0[1], p1[1], p2[1], p3[1] },
 		{ p0[2], p1[2], p2[2], p3[2] },
-		{ 1.0f, 1.0f, 1.0f, 1.0f }  // Homogeneous coordinate
+		{ 1.0f, 1.0f, 1.0f, 1.0f }
 	};
 	// Fill in as shown on lecture slides.
 
@@ -87,15 +86,7 @@ void tessellateCubicSplineSegment(	const Vector3f& p0,
 			};
 		};
 		float t = float(i) / num_intervals;
-		/*float pt_x = ((1 - t) * (1 - t) * (1 - t)) * p0[0] +
-			(3 * t * ((1 - t) * (1 - t)) * p1[0]) + 
-			((3 * t * t * (1 - t)) * p2[0]) + 
-			(t * t * t * p3[0]);
-		float pt_y = ((1 - t) * (1 - t) * (1 - t)) * p0[1] +
-			(3 * t * ((1 - t) * (1 - t)) * p1[1]) +
-			((3 * t * t * (1 - t)) * p2[1]) +
-			(t * t * t * p3[1]);
-		*/
+
 		CurvePoint p;
 		Vector4f point = G * (B * Vector4f{ 1.0f, t, t * t, t * t * t });
 		p.position = Vector3f(point[0], point[1], point[2]);
@@ -124,7 +115,7 @@ void tessellateBezier(const vector<Vector3f>& P, vector<CurvePoint>& dest, unsig
 	// generate on each piece of the spline, as per the instructions
 	// for tessellateCubicSplineSegment(...).
 
-	for (unsigned i = 0; i < P.size() - 3 ; ++i) {
+	for (unsigned i = 0; i < P.size() - 3 ; i += 3) {
 		bool include_last = (i == P.size() - 4);
 
 		tessellateCubicSplineSegment(P[i], P[i+1], P[i+2], P[i+3], num_intervals, include_last, B_Bezier, dest);
@@ -162,6 +153,10 @@ void tessellateBspline(const vector<Vector3f>& P, vector<CurvePoint>& dest, unsi
 	dest.clear();
 
     // YOUR CODE HERE (R2):
+
+	for (unsigned i = 0; i < P.size() - 3; ++i) {
+		tessellateCubicSplineSegment(P[i], P[i + 1], P[i + 2], P[i + 3], num_intervals, true, B_BSpline, dest);
+	}
 
 	cerr << ">>> tessellateBspline has been called with the following input:" << endl;
 
