@@ -85,9 +85,35 @@ void MeshWithConnectivity::LoopSubdivision() {
 				Vector3f pos, col, norm;
 
 				// This default implementation just puts the new vertex at the edge midpoint.
-				pos = 0.5f * (positions[v0] + positions[v1]);
+				//pos = 0.5f * (positions[v0] + positions[v1]);
 				col = 0.5f * (colors[v0] + colors[v1]);
 				norm = 0.5f * (normals[v0] + normals[v1]);
+				int neighbor_left = indices[i][(j + 2) % 3];
+				/*
+				Use the connectivity structure to get the index of the triangle on the other side and the index of the
+				edge that corresponds to the current one; then you can just walk around the other triangle two steps like
+				you just did in this current triangle.
+				*/
+				// Vector3i this_triangle = indices[i]; // start vertices of e_0, e_1, e_2 -> is the triangle
+
+				int triangle_right = neighborTris[i][j]; // neighbor triangle of the current edge
+
+				Vector3f weight_right;
+				if (triangle_right != -1) {
+					// has neighbor -> calculate its weight
+					int neighbor_edge = neighborEdges[i][j];
+					int neighbor_right = indices[triangle_right][neighbor_edge];
+					weight_right = (1.0f / 8.0f) * positions[neighbor_right];
+				}
+				else {
+					// no neighbor, is the boundary -> set weight of that side vertex to 0
+					weight_right = { 0.0f,0.0f,0.0f };
+				}
+
+				Vector3f weight_left = (1.0f / 8.0f) * positions[neighbor_left];
+				
+				pos = (3.0f / 8.0f) * (positions[v0] + positions[v1]) +
+					weight_left + weight_right;
 
 				new_positions.push_back(pos);
 				new_colors.push_back(col);
