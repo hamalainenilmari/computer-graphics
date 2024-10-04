@@ -96,6 +96,7 @@ void MeshWithConnectivity::LoopSubdivision() {
 				// YOUR CODE HERE (R3):
 				// Map the edge to the correct vertex index.
 				// This is just one line! Use new_vertices and the index of the position that was just pushed back to the vector.
+				new_vertices[edge] = new_positions.size() - 1;
 			}
 		}
 	// compute positions for even (old) vertices
@@ -145,32 +146,55 @@ void MeshWithConnectivity::LoopSubdivision() {
 	for (size_t i = 0; i < indices.size(); ++i) {
 		Vector3i even = indices[i]; // start vertices of e_0, e_1, e_2
 
+		/*
+		For each old triangle, you create four new ones.
+		The old indices are given in the triplet even.
+		Build the similar vector of 3 ints odd using the information from new_vertices. For this, you will need
+		to query new_vertices to get the index of each new vertex added to the middle of each edge of the old
+		triangle.
+		*/
+
 		// YOUR CODE HERE (R3):
 		// fill in X and Y (it's the same for both)
-		//auto edge_a = std::make_pair(min(X, Y), max(X, Y));
-		//auto edge_b = ...
-		//auto edge_c = ...
+
+		auto edge_a = std::make_pair(min(even[0], even[1]), max(even[0], even[1])); // old edge e0
+		auto edge_b = std::make_pair(min(even[1], even[2]), max(even[1], even[2])); // old edge e1
+		auto edge_c = std::make_pair(min(even[2], even[0]), max(even[2], even[0])); // old edge e2
+
+		// query new_vertices to get the index of each new vertex added to the middle of each old edge
+		int new_vertex_e0 = new_vertices[edge_a];
+		int new_vertex_e1 = new_vertices[edge_b];
+		int new_vertex_e2 = new_vertices[edge_c];
 
 		// The edges edge_a, edge_b and edge_c now define the vertex indices via new_vertices.
 		// (The mapping is done in the loop above.)
 		// The indices define the smaller triangle inside the indices defined by "even", in order.
 		// Read the vertex indices out of new_vertices to build the small triangle "odd"
 
-		// Vector3i odd = ...
+		Vector3i odd1 = { even[0], new_vertex_e0, new_vertex_e2 };
+		Vector3i odd2 = { new_vertex_e0, even[1], new_vertex_e1 };
+		Vector3i odd3 = { new_vertex_e0, new_vertex_e1, new_vertex_e2 };
+		Vector3i odd4 = { new_vertex_e2, new_vertex_e1, even[2]};
+
 
 		// Then, construct the four smaller triangles from the surrounding big triangle  "even"
 		// and the inner one, "odd". Push them to "new_indices".
 
+
 		// NOTE: REMOVE the following line after you're done with the new triangles.
 		// This just keeps the mesh intact and serves as an example on how to add new triangles.
-		new_indices.push_back( Vector3i( even[0], even[1], even[2] ) );
+		//new_indices.push_back( Vector3i( even[0], even[1], even[2] ) );
+		new_indices.push_back(odd1);
+		new_indices.push_back(odd2);
+		new_indices.push_back(odd3);
+		new_indices.push_back(odd4);
 	}
 
 	// ADD THESE LINES when R3 is finished. Replace the originals with the repositioned data.
-	//indices = std::move(new_indices);
-	//positions = std::move(new_positions);
-	//normals = std::move(new_normals);
-	//colors = std::move(new_colors);
+	indices = std::move(new_indices);
+	positions = std::move(new_positions);
+	normals = std::move(new_normals);
+	colors = std::move(new_colors);
 }
 
 MeshWithConnectivity* MeshWithConnectivity::loadOBJ(const string& filename)
