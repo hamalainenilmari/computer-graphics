@@ -76,20 +76,16 @@ void tessellateCubicSplineSegment(	const Vector3f& p0,
 	};
 	// Fill in as shown on lecture slides.
 
-	unsigned pts_to_add = num_intervals + (include_last_point ? 1 : 0);  // replace with correct value
+	unsigned pts_to_add = num_intervals + (include_last_point ? 1 : 0);
 
 	for (unsigned i = 0; i < pts_to_add; ++i)
 	{	
-		if (i == pts_to_add - 1) {
-			if (!include_last_point) {
-				continue;
-			};
-		};
 		float t = float(i) / num_intervals;
 
 		CurvePoint p;
 		Vector4f point = G * (B * Vector4f{ 1.0f, t, t * t, t * t * t });
 		p.position = Vector3f(point[0], point[1], point[2]);
+		// cout << "position: " << p.position;
 		dest.push_back(p);
 	}
 
