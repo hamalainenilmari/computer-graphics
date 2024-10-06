@@ -3,9 +3,9 @@
 #
 # Assignment 2: Curves and Surfaces
 
-Student name:
-Student number:
-Hours spent on requirements (approx.):
+Student name: Ilmari Hämäläinen
+Student number: 894931
+Hours spent on requirements (approx.): 20
 Hours spent on extra credit (approx.):
 
 # First, some questions about how you worked on this assignment.
@@ -14,8 +14,12 @@ Hours spent on extra credit (approx.):
 
 - Did you go to lectures?
 
+Until 4. one
+
 - Please list all platforms you used when working on this assignment.
   E.g., Aalto Windows computers, your own Mac or Linux computers, Aalto VDI virtual machines..
+  
+ My own Windows laptop
 
 
 # Which parts of the assignment did you complete? Mark them 'done'.
@@ -23,11 +27,11 @@ Hours spent on extra credit (approx.):
 # effort on them. If you do, explain the work you did in the problems/bugs section
 # and leave your 'attempt' code in place (commented out if necessary) so we can see it.
 
-                        R1 Evaluating Bezier curves (3p): not done
-                      R2 Evaluating B-spline curves (1p): not done
-       R3 Subdividing a mesh into smaller triangles (2p): not done
-        R4 Computing positions for the new vertices (2p): not done
-R5 Smoothing the mesh by repositioning old vertices (2p): not done
+                        R1 Evaluating Bezier curves (3p): done
+                      R2 Evaluating B-spline curves (1p): done
+       R3 Subdividing a mesh into smaller triangles (2p): done
+        R4 Computing positions for the new vertices (2p): done
+R5 Smoothing the mesh by repositioning old vertices (2p): done
 
 # Did you do any extra credit work?
 
@@ -36,6 +40,8 @@ R5 Smoothing the mesh by repositioning old vertices (2p): not done
 # Are there any known problems/bugs remaining in your code?
 
 (Please provide a list of the problems. If possible, describe what you think the cause is, how you have attempted to diagnose or fix the problem, and how you would attempt to diagnose or fix it if you had more time or motivation. This is important: we are more likely to assign partial credit if you help us understand what's going on.)
+
+I am not sure if the subdivision works correctly because the new triangles are not as smooth as in the reference.exe. I understand that doing extras makes the objects match the reference more, but some pictures of how the objects should look like after correctly implementing only the requirements would have been helpful.
 
 # Did you collaborate with anyone in the class?
 
