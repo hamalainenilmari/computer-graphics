@@ -101,7 +101,7 @@ void MeshWithConnectivity::LoopSubdivision() {
 				Vector3f weight_right;
 				if (triangle_right != -1) {
 					// has neighbor -> calculate its weight
-					int neighbor_edge = neighborEdges[i][j];
+					int neighbor_edge = neighborEdges[i][j]; // the same edge of the neighboring triangle
 					int neighbor_right = indices[triangle_right][neighbor_edge];
 					weight_right = (1.0f / 8.0f) * positions[neighbor_right];
 				}
@@ -128,9 +128,9 @@ void MeshWithConnectivity::LoopSubdivision() {
 	// compute positions for even (old) vertices
 	vector<bool> vertexComputed(new_positions.size(), false);
 
-	for (int i = 0; i < (int)indices.size(); ++i) {
-		for (int j = 0; j < 3; ++j) {
-			int v0 = indices[i][j];
+	for (int i = 0; i < (int)indices.size(); ++i) { // every triangle
+		for (int j = 0; j < 3; ++j) { // every 3 vertices of the triangle
+			int v0 = indices[i][j]; // vertice in the triangle -> compute weights of vertices connected to this one
 
 			// don't redo if this one is already done
 			if (vertexComputed[v0] )
@@ -142,6 +142,67 @@ void MeshWithConnectivity::LoopSubdivision() {
 			Vector3f col(Vector3f::Zero());
 			Vector3f norm(Vector3f::Zero());
 			// YOUR CODE HERE (R5): reposition the old vertices
+
+			// positions of neighboring vertices
+			vector<Vector3f> neighborPositions;
+
+			int current_triangle = i;
+			int current_edge = j;
+			// cout << "Current triangle, edge, vertice at beginning: " << current_triangle << " " << current_edge << " " << v0 << endl;
+
+			while (true) {
+				// cout << "Current triangle and edge: " << current_triangle << " " << current_edge << endl;
+
+				// find neighboring triangle and edge
+				int neighbor_triangle = neighborTris[current_triangle][current_edge];
+				int neighbor_edge = neighborEdges[current_triangle][current_edge];
+
+				// cout << "travelling to neighbor triangle and edge: " << neighbor_triangle << " " << neighbor_edge << endl;
+
+				// in case of boundary
+				if (neighbor_triangle == -1) {
+					// cout << "neighbor triangle is boundary " << current_triangle << endl;
+					break;
+				}
+
+				// find third vertex of the triangle to add to neighbors
+				int third_vertex = indices[neighbor_triangle][(neighbor_edge + 2) % 3]; 
+				neighborPositions.push_back(positions[third_vertex]);
+
+				// cout << "third vertice of neighbor, adding to neigbors : " << third_vertex << endl;
+				
+
+				// travel to next triangle
+				current_triangle = neighbor_triangle;
+				current_edge = (neighbor_edge + 1) % 3;
+				
+				// stop when travelled full cirle
+				if (current_triangle == i) {
+					// cout << "back to original triangle: " << current_triangle << endl;
+					break;
+				}
+				
+			}
+
+			int n = (int)neighborPositions.size();
+			Vector3f v0_pos;
+			// cout << "size of neighboring vertices : " << n << endl;
+			// cout << "--------------------------------" << endl;
+			float B;
+			if (n > 3) {
+				B = 3.0f / (8.0f * n);
+				
+			} else if (n == 3)  {
+				B = 3.0f / (16.0f);
+			}
+			else {
+				B = 0;
+			}
+			Vector3f pos_sum(0.0f, 0.0f, 0.0f);
+			for (Vector3f position : neighborPositions) {
+				pos_sum += position;
+			}
+			v0_pos = (1.0f - n * B) * positions[v0] + B*(pos_sum);
 
 			// This default implementation just passes the data through unchanged.
 			// You need to replace these three lines with the loop over the 1-ring
@@ -159,7 +220,7 @@ void MeshWithConnectivity::LoopSubdivision() {
 			col = colors[v0];
 			norm = normals[v0];
 
-			new_positions[v0] = pos;
+			new_positions[v0] = v0_pos;
 			new_colors[v0] = col;
 			new_normals[v0] = norm;
 		}
