@@ -3,31 +3,34 @@
 #
 # Assignment 3: Hierarchical transforms
 
-Student name:
-Student number:
-Hours spent on requirements (approx.):
-Hours spent on extra credit (approx.):
+Student name: Ilmari Hämäläinen
+Student number: 894931
+Hours spent on requirements (approx.): 12h
+Hours spent on extra credit (approx.): 1h
 
 # First, a 10-second poll about this assignment period:
 
 Did you go to exercise sessions?
+- No
 
 Did you work on the assignment using Aalto computers, your own computers, or both?
+- Own computer
 
 # Which parts of the assignment did you complete? Mark them 'done'.
 # You can also mark non-completed parts as 'attempted' if you spent a fair amount of
 # effort on them. If you do, explain the work you did in the problems/bugs section
 # and leave your 'attempt' code in place (commented out if necessary) so we can see it.
 
-           R1 Calculating joint positions (1 p): not done
-                   R2 Rotating the joints (2 p): not done
-  R3 Visualizing joint coordinate systems (2 p): not done
-       R4 Skeletal subspace deformation (4 pts): not done
-                R5 Skinning for normals (1 pts): not done
+           R1 Calculating joint positions (1 p): done
+                   R2 Rotating the joints (2 p): done
+  R3 Visualizing joint coordinate systems (2 p): done
+       R4 Skeletal subspace deformation (4 pts): done
+                R5 Skinning for normals (1 pts): done
 
 # Did you do any extra credit work?
 
 (Describe what you did and, if there was a substantial amount of work involved, how you did it. Also describe how to use/activate your extra features, if they are interactive.)
+- extra work in R5, skinning normals with inverse transpose.
 
 # Are there any known problems/bugs remaining in your code?
 
@@ -41,3 +44,4 @@ Did you work on the assignment using Aalto computers, your own computers, or bot
 
 (Was the assignment too long? Too hard? Fun or boring? Did you learn something, or was it a total waste of time? Can we do something differently to help you learn? Please be brutally honest; we won't take it personally.)
 
+- very fun exercise!

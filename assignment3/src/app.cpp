@@ -650,13 +650,16 @@ void App::computeSSD(const vector<WeightedVertex>& source_vertices, vector<Verte
         v.normal = sv.normal;
         v.color = sv.color;
         v.position = Vector3f( 0,0,0 );
+        Matrix4f temp = Matrix4f::Identity();
         for (int i = 0; i < 8; ++i) {
             Vector4f p4;
             p4 << sv.position, 1.0f;
             // w_ij * T_j * (B_j)^-1 * p_i
             //cout << "weight: " << sv.weights[i] << endl;
             v.position += sv.weights[i] * (ssd_transforms[sv.joints[i]] * p4)({ 0,1,2 });
+            temp += sv.weights[i] * (ssd_transforms[sv.joints[i]]);
         };
+        v.normal = (temp.block(0, 0, 3, 3).inverse().transpose() * sv.normal).normalized();
 
         dest.push_back(v);
     }
