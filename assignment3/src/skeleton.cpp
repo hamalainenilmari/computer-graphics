@@ -66,6 +66,25 @@ Matrix4f Skeleton::computeJointToParent(unsigned index) const
     // three times in a row, once for each axis determined
     // by joint.euler_order, and multiply the results.
 
+    Vector3f angles = joint.euler_angles; // Joint rotation in Euler angles
+    Vector3i order = joint.euler_order; // This vector contains the ordering in which Euler rotations are to be constructed for this particular joint.
+    
+    Vector3f radians = joint.euler_angles * (EIGEN_PI / 180.0f);
+    Matrix3f R = Matrix3f::Identity();
+    for (int i = 0; i < 3; ++i) {
+        if (order[i] == 0) {
+            R = R * Matrix3f(AngleAxis<float>(radians[0], Vector3f{ 1, 0, 0 }));
+        }
+        else if (order[i] == 1) {
+            R = R * Matrix3f(AngleAxis<float>(radians[1], Vector3f{ 0, 1, 0 }));
+        }
+        else if (order[i] == 2) {
+            R = R * Matrix3f(AngleAxis<float>(radians[2], Vector3f{ 0, 0, 1 }));
+        }
+    }
+ 
+    to_parent.block(0, 0, 3, 3) = R;
+
     return to_parent;
 }
 
