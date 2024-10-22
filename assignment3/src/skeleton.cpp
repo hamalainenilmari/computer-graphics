@@ -73,13 +73,13 @@ Matrix4f Skeleton::computeJointToParent(unsigned index) const
     Matrix3f R = Matrix3f::Identity();
     for (int i = 0; i < 3; ++i) {
         if (order[i] == 0) {
-            R = R * Matrix3f(AngleAxis<float>(radians[0], Vector3f{ 1, 0, 0 }));
+            R = R * Matrix3f(AngleAxis<float>(radians[i], Vector3f{ 1, 0, 0 }));
         }
         else if (order[i] == 1) {
-            R = R * Matrix3f(AngleAxis<float>(radians[1], Vector3f{ 0, 1, 0 }));
+            R = R * Matrix3f(AngleAxis<float>(radians[i], Vector3f{ 0, 1, 0 }));
         }
         else if (order[i] == 2) {
-            R = R * Matrix3f(AngleAxis<float>(radians[2], Vector3f{ 0, 0, 1 }));
+            R = R * Matrix3f(AngleAxis<float>(radians[i], Vector3f{ 0, 0, 1 }));
         }
     }
  
@@ -134,6 +134,11 @@ void Skeleton::computeToBindTransforms()
     // which means that joint_to_world is, in fact, the mapping from
     // joint's spaces to the object space where the skin's bind pose vertex
     // coordinates are given.
+
+    for (int i = 0; i < joints_.size(); ++i) {
+        Matrix4f jointToWorld = (joints_[i].joint_to_world).inverse();
+        joints_[i].bind_to_joint = jointToWorld;
+    };
 }
 
 void Skeleton::getToWorldTransforms(vector<Matrix4f>& dest)
@@ -159,10 +164,19 @@ void Skeleton::getSSDTransforms(vector<Matrix4f>& dest)
     // starter code just makes sure the downstream rendering code work,
     // though obviously without animation.
 
+    /* Then, continue to fill in Skeleton::getSSDTransforms() which produces transforms between the bind
+        pose and current pose, exactly as we saw in class. You need to use the joint-to-world transforms Ti you’ve
+        already computed and stored earlier. This function is called each frame by the rendering code.
+    */
+
+
     dest.clear();
 
-    for (const auto& j : joints_)
-        dest.push_back(Matrix4f::Identity());
+    for (const auto& j : joints_) {
+        //j.joint_to_world; //T_i
+        //j.bind_to_joint; //inv(B_i)
+        dest.push_back((j.joint_to_world * j.bind_to_joint));
+    }
 
 }
 

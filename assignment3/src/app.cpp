@@ -624,12 +624,39 @@ void App::computeSSD(const vector<WeightedVertex>& source_vertices, vector<Verte
         // joint-to-world transformations, so your solution does not have to explicitly
         // do it; you do not need the object_to_world matrix in the solution. It is
         // included here to make the unskinned bind-pose mesh reasonably sized and positioned.
-
+        /*
+        * The last piece of the puzzle is App::computeSSD(). It uses the transforms from Skeleton and a mesh
+        that comes with vertex weights, and produces a mesh of plain vertices that have been deformed to conform
+        to the current position of the joints. You job is, for each vertex of the skin, to loop over all the weights in
+        every skin vertex (see WeightedVertex in app.h), transform the vertex using the SSD transformations, and
+        finally blend the results together using the weights, again, precisely as shown on the lectures. (Note that the
+        starter code applies the object-to-world mapping to the vertex coordinates explicitly. As the joint-to-world
+        transformations you will compute in R1 and R2 will have this transformation built in, there is no need to
+        apply it during skinning.)
         Vector4f p4;
         p4 << sv.position, 1.0f;
         v.position = (skel_.getObjectToWorldTransform() * p4)({ 0, 1, 2 }); // fancy way of getting 1st three components from Vector4f
         v.normal = sv.normal;
         v.color = sv.color;
+         struct WeightedVertex
+        {
+            Vector3f position   = Vector3f::Zero();
+            Vector3f normal     = Vector3f::Zero();
+            Vector3f color      = Vector3f::Zero();
+            int		joints[WEIGHTS_PER_VERTEX];
+            float	weights[WEIGHTS_PER_VERTEX];
+        };
+        */
+        v.normal = sv.normal;
+        v.color = sv.color;
+        v.position = Vector3f( 0,0,0 );
+        for (int i = 0; i < 8; ++i) {
+            Vector4f p4;
+            p4 << sv.position, 1.0f;
+            // w_ij * T_j * (B_j)^-1 * p_i
+            //cout << "weight: " << sv.weights[i] << endl;
+            v.position += sv.weights[i] * (ssd_transforms[sv.joints[i]] * p4)({ 0,1,2 });
+        };
 
         dest.push_back(v);
     }
