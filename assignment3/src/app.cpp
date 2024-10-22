@@ -556,30 +556,39 @@ void App::renderSkeleton(vector<string>& vecStatusMessages)
             // Use the transforms to obtain the joint's orientation.
             // (If you understand transformation matrices correctly, you can directly
             // read the these vectors off of the matrices.)
-            Vector3f right(Vector3f::Zero());
-            Vector3f up(Vector3f::Zero());
-            Vector3f ahead(Vector3f::Zero());
+            Matrix3f rotation = joint_to_world_transforms[i].block(0, 0, 3, 3);
+            Vector3f rotationOfWorldX = rotation * Vector3f(1, 0, 0);
+            Vector3f rotationOfWorldY = rotation * Vector3f(0, 1, 0);
+            Vector3f rotationOfWorldZ = rotation * Vector3f(0, 0, 1);
+            //Vector3f right = joint_world_pos * rotationOfWorldX;
+
+            //Vector3f right(joint_world_pos * rotationOfWorldX);
+            //Vector3f up(rotationOfWorldY * joint_world_pos);
+            //Vector3f ahead(rotationOfWorldZ * joint_world_pos);
             // Then let's draw some lines to show the joint coordinate system.
             // Draw a small coloured line segment from the joint's world position towards
             // each of its local coordinate axes (the line length should be determined by "scale").
             // The colors for each axis are already set for you below.
             float scale = i == selected_joint_ ? 10.0f : 2.5f;	// length for the coordinate system axes.
+            Vector3f finalX = (joint_world_pos + scale * rotationOfWorldX);
+            Vector3f finalY = (joint_world_pos + scale * rotationOfWorldY);
+            Vector3f finalZ = (joint_world_pos + scale * rotationOfWorldZ);
             Im3d::BeginLines();
 
             // draw the x axis... ("right")
             Im3d::SetColor(1.0, 0.0f, 0.0f);
-            //Im3d::Vertex(...);
-            //Im3d::Vertex(...);
+            Im3d::Vertex(joint_world_pos);
+            Im3d::Vertex(finalX);
 
             // ..and the y axis.. ("up")
             Im3d::SetColor(0, 1, 0); // green
-            //Im3d::Vertex(...);
-            //Im3d::Vertex(...);
+            Im3d::Vertex(joint_world_pos);
+            Im3d::Vertex(finalY);
 
             // ..and the z axis ("ahead").
             Im3d::SetColor(0, 0, 1); // blue
-            //Im3d::Vertex(...);
-            //Im3d::Vertex(...);
+            Im3d::Vertex(joint_world_pos);
+            Im3d::Vertex(finalZ);
             Im3d::End();  // done with frame lines
         }
 
@@ -588,7 +597,10 @@ void App::renderSkeleton(vector<string>& vecStatusMessages)
         // Finally, draw a line segment from the world position of this joint to the world
         // position of the parent joint. Make sure to account for the root node 0 correctly.
             
-        // ...
+        int parent = skel_.getJointParent(i);
+        if (parent >= 0) { 
+            Im3d::Vertex(joint_world_pos);
+            Im3d::Vertex(Vector3f(joint_to_world_transforms[parent](0, 3), joint_to_world_transforms[parent](1, 3), joint_to_world_transforms[parent](2, 3))); };
         Im3d::End(); // we're done drawing lines	
     }
 }
