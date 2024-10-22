@@ -5,8 +5,10 @@
 #include <stack>
 #include <sstream>
 #include <cctype>
+#include <iostream>
 
 using namespace std;
+
 
 namespace {
     // Helper for linear interpolation of Euler angles between animation frames.
@@ -87,6 +89,17 @@ void Skeleton::updateToWorldTransforms(unsigned joint_index, const Matrix4f& par
 {
     // YOUR CODE HERE (R1)
     // Update transforms for joint at joint_index and its children.
+
+    Matrix4f jointToWorld = parent_to_world * computeJointToParent(joint_index);
+    joints_[joint_index].joint_to_world = jointToWorld;
+    
+    for (int i = 0; i < joints_[joint_index].children.size(); ++i) {
+        //cout << "i: " << i << "joint children: " << joint.children << endl;
+        int child = joints_[joint_index].children[i];
+        updateToWorldTransforms(child, jointToWorld);
+    };
+    
+    
 }
 
 void Skeleton::computeToBindTransforms()

@@ -533,7 +533,7 @@ void App::renderSkeleton(vector<string>& vecStatusMessages)
         // YOUR CODE HERE (R1)
         // Use the transforms to obtain the position of the joint in world space.
         // This should be a one-liner.
-        Vector3f joint_world_pos(Vector3f::Zero());
+        Vector3f joint_world_pos = Vector3f(joint_to_world_transforms[i](0, 3), joint_to_world_transforms[i](1, 3), joint_to_world_transforms[i](2, 3));
         Im3d::BeginPoints();
         if (i == (int)selected_joint_)
         {
