@@ -348,33 +348,66 @@ void App::initRendering()
         "#version 330\n"
         "#extension GL_ARB_separate_shader_objects : enable\n"
         FW_GL_SHADER_SOURCE(
-        layout(location = 0) in vec4 aPosition;
-        layout(location = 1) in vec3 aNormal;
-        layout(location = 2) in vec4 aColor;
-        layout(location = 3) in ivec4 aJoints1;
-        layout(location = 4) in ivec4 aJoints2;
-        layout(location = 5) in vec4 aWeights1;
-        layout(location = 6) in vec4 aWeights2;
+            layout(location = 0) in vec4 aPosition;
+    layout(location = 1) in vec3 aNormal;
+    layout(location = 2) in vec4 aColor;
+    layout(location = 3) in ivec4 aJoints1;
+    layout(location = 4) in ivec4 aJoints2;
+    layout(location = 5) in vec4 aWeights1;
+    layout(location = 6) in vec4 aWeights2;
 
-        const vec3 directionToLight = normalize(vec3(0.5, 0.5, 0.6));
-        uniform mat4 uWorldToClip;
-        uniform float uShadingMix;
+    const vec3 directionToLight = normalize(vec3(0.5, 0.5, 0.6));
+    uniform mat4 uWorldToClip;
+    uniform float uShadingMix;
 
-        out vec4 vColor;		
+    out vec4 vColor;
 
-        const int numJoints = 100;
-        uniform mat4 uJoints[numJoints];
-    
-        void main()
-        {
-            float clampedCosine = clamp(dot(aNormal, directionToLight), 0.0, 1.0);
-            // this next line is just to force a reference to the uJoints uniform;
-            // without it the compiler optimizes the reference away and
-            // the rendering code doesn't work.
-            clampedCosine += 1e-8 * uJoints[0][0][0];
-            vec3 litColor = vec3(clampedCosine);
-            vColor = vec4(mix(aColor.xyz, litColor, uShadingMix), 1);
-            gl_Position = uWorldToClip * aPosition;
+    const int numJoints = 100;
+    uniform mat4 uJoints[numJoints];
+
+    void main()
+    {
+        float clampedCosine = clamp(dot(aNormal, directionToLight), 0.0, 1.0);
+        // this next line is just to force a reference to the uJoints uniform;
+        // without it the compiler optimizes the reference away and
+        // the rendering code doesn't work.
+        //clampedCosine += 1e-8 * uJoints[0][0][0];
+        //vec3 litColor = vec3(clampedCosine);
+        //vColor = vec4(mix(aColor.xyz, litColor, uShadingMix), 1);
+        /*
+        v.normal = sv.normal;
+    v.color = sv.color;
+    v.position = Vector3f( 0,0,0 );
+    Matrix4f temp = Matrix4f::Zero();
+    for (int i = 0; i < 8; ++i) {
+        Vector4f p4;
+        p4 << sv.position, 1.0f;
+        // w_ij * T_j * (B_j)^-1 * p_i
+        v.position += sv.weights[i] * (ssd_transforms[sv.joints[i]] * p4)({ 0,1,2 });
+        temp += sv.weights[i] * ssd_transforms[sv.joints[i]];
+
+    };
+    v.normal = (temp.inverse().transpose().block(0,0,3,3) * sv.normal).normalized();
+        */
+
+        mat4 temp = mat4(0.0);
+        vec4 newPos = vec4(0.0);
+        for (int i = 0; i < 4; ++i) {
+            newPos += (uJoints[aJoints1[i]] * aPosition) * aWeights1[i];
+            temp += aWeights1[i] * uJoints[aJoints1[i]];
+        }
+        for (int i = 0; i < 4; ++i) {
+            newPos += (uJoints[aJoints2[i]] * aPosition) * aWeights2[i];
+            temp += aWeights2[i] * uJoints[aJoints2[i]];
+        }
+        gl_Position = uWorldToClip * newPos;
+        vec3 normal = normalize(mat3(transpose(inverse(temp))) * aNormal);
+          
+        clampedCosine = clamp(dot(normal, directionToLight), 0.0, 1.0);
+
+        vec3 litColor = vec3(clampedCosine);
+
+        vColor = vec4(mix(aColor.xyz, litColor, uShadingMix), 1);
         }
         ),
         "#version 330\n"
@@ -475,10 +508,10 @@ void App::render(int window_width, int window_height, vector<string>& vecStatusM
 
         // When working on GPU skinning extra, REMOVE THIS and just pass
         // in world_to_clip.data() in the 1st glUniformMatrix4fv call!
-        Matrix4f gpu_ssd_object_to_clip = world_to_clip * skel_.getObjectToWorldTransform();
+        //Matrix4f gpu_ssd_object_to_clip = world_to_clip * skel_.getObjectToWorldTransform();
 
         glUseProgram(gl_.ssd_shader);
-        glUniformMatrix4fv(gl_.ssd_world_to_clip_uniform, 1, GL_FALSE, gpu_ssd_object_to_clip.data());
+        glUniformMatrix4fv(gl_.ssd_world_to_clip_uniform, 1, GL_FALSE, world_to_clip.data());
         glUniform1f(gl_.ssd_shading_mix_uniform, shading_toggle_ ? 1.0f : 0.0f);
         glUniformMatrix4fv(gl_.ssd_transforms_uniform, GLsizei(ssd_transforms.size()), GL_FALSE, (GLfloat*)ssd_transforms.data());
         
@@ -650,16 +683,16 @@ void App::computeSSD(const vector<WeightedVertex>& source_vertices, vector<Verte
         v.normal = sv.normal;
         v.color = sv.color;
         v.position = Vector3f( 0,0,0 );
-        Matrix4f temp = Matrix4f::Identity();
+        Matrix4f temp = Matrix4f::Zero();
         for (int i = 0; i < 8; ++i) {
             Vector4f p4;
             p4 << sv.position, 1.0f;
             // w_ij * T_j * (B_j)^-1 * p_i
-            //cout << "weight: " << sv.weights[i] << endl;
             v.position += sv.weights[i] * (ssd_transforms[sv.joints[i]] * p4)({ 0,1,2 });
-            temp += sv.weights[i] * (ssd_transforms[sv.joints[i]]);
+            temp += sv.weights[i] * ssd_transforms[sv.joints[i]];
+
         };
-        v.normal = (temp.block(0, 0, 3, 3).inverse().transpose() * sv.normal).normalized();
+        v.normal = (temp.inverse().transpose().block(0,0,3,3) * sv.normal).normalized();
 
         dest.push_back(v);
     }
