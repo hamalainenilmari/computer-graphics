@@ -31,6 +31,7 @@ Did you work on the assignment using Aalto computers, your own computers, or bot
 
 (Describe what you did and, if there was a substantial amount of work involved, how you did it. Also describe how to use/activate your extra features, if they are interactive.)
 - extra work in R5, skinning normals with inverse transpose.
+- extra recommended: SSD on the GPU (2p)
 
 # Are there any known problems/bugs remaining in your code?
 
