@@ -1,0 +1,12 @@
+build/
+package/
+imgui.ini
+.vscode/
+**/handout/latex_definitions.tex
+**/handout/*.log
+**/handout/*.aux
+**/handout/*.out
+**/handout/*.pdf
+**/handout/*.synctex.gz
+**/handout/*.bbl
+**/handout/*.blg
