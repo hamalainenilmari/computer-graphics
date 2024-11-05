@@ -22,7 +22,8 @@ VectorXf eulerStep(const ParticleSystem& ps, float dt)
 	// Use ps.state() to access the current state and
 	// ps.evalF(...) to compute the derivative dX/dt.
 	// Return the new state after the Euler step.
-	return ps.state();	// No-op, replace this
+	return ps.state() + (dt * ps.evalF(ps.state()));
+	//return ps.state();	// No-op, replace this
 };
 
 VectorXf trapezoidStep(const ParticleSystem& ps, float dt)
