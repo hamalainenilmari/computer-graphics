@@ -71,10 +71,10 @@ public:
     // Helper functions to read and write the 2D positions and velocities in state vectors.
     // The Map that is returned acts pretty much like a Vector2f, but its contents are stored in a particular
     // location in the longer state vector. See Eigen's documentation for details.
-    static auto				position(VectorXf& X, int idx)				{ return Map<Vector2f>(&X(idx * 4)); }
-    static auto				position(const VectorXf& X, int idx)		{ return Map<const Vector2f>(&X(idx * 4)); }
-    static auto				velocity(VectorXf& X, int idx)				{ return Map<Vector2f>(&X(idx * 4 + 2)); }
-    static auto				velocity(const VectorXf& X, int idx)		{ return Map<const Vector2f>(&X(idx * 4 + 2)); }
+    static auto				position(VectorXf& X, int idx)				{ return Map<Vector2f>(&X(idx * 4)); }          // write pos
+    static auto				position(const VectorXf& X, int idx)		{ return Map<const Vector2f>(&X(idx * 4)); }    // read pos
+    static auto				velocity(VectorXf& X, int idx)				{ return Map<Vector2f>(&X(idx * 4 + 2)); }      // write
+    static auto				velocity(const VectorXf& X, int idx)		{ return Map<const Vector2f>(&X(idx * 4 + 2)); }// read
 
     void					reset() override;
     void					render(const VectorXf& X) const override;

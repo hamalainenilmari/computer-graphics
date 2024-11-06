@@ -114,6 +114,8 @@ void SpringSystem::reset()
     // Set the initial state for a particle system with one particle fixed
     // at origin and another particle hanging off the first one with a spring.
     // Place the second particle initially at start_pos.
+    position(current_state_, 1) = start_pos;
+    velocity(current_state_, 1) = Vector2f::Zero();
 }
 
 void SpringSystem::imgui_interface()
@@ -136,6 +138,10 @@ VectorXf SpringSystem::evalF(const VectorXf& X) const
     // YOUR CODE HERE (R2)
     // Return a derivative for the system as if it was in state "state".
     // You can use the fGravity, fDrag and fSpring helper functions for the forces.
+ 
+    position(f, 1) = velocity(X, 1);
+    velocity(f, 1) = ( fGravity2(mass) + fDrag(velocity(X, 1), drag_k) + fSpring(position(X,1), position(X, 0), k_, 0.5f) ) / mass;
+
     return f;
 }
 
@@ -171,12 +177,26 @@ void SpringSystem::render(const VectorXf& state) const
 void MultiPendulumSystem::reset()
 {
     const auto start_point = Vector2f(0.0f, 1.0f);
-    Vector2f end_point = start_point + Vector2f(1.5f, 0.1f);
+    Vector2f end_point = start_point + Vector2f(1.5f, 0.1f); // (1.5, 1.1)
     current_state_.setZero(4 * n_);
     // YOUR CODE HERE (R4)
     // Set the initial state for a pendulum system with n_ particles
     // connected with springs into a chain from start_point to end_point with uniform intervals.
     // The rest length of each spring is its length in this initial configuration.
+
+    position(current_state_, 0) = start_point;  // position of point #0
+    velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
+    const auto intervalX = 1.5 / n_;
+    const auto intervalY = 0.1 / n_;
+    cout << "intervalX: " << intervalX << endl;
+    cout << "intervalY: " << intervalY << endl;
+
+    for (auto i = 1u; i < n_; ++i) {
+        position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
+        velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
+        auto const spr = Spring(i-1, i, k_, 0.5f);
+        springs_.push_back(spr);
+    };
 }
 
 void MultiPendulumSystem::imgui_interface()
@@ -206,6 +226,26 @@ VectorXf MultiPendulumSystem::evalF(const VectorXf& X) const
     VectorXf dXdt(0 * X);	// initialize with 0*X
     // YOUR CODE HERE (R4)
     // As in R2, return a derivative of the system state specified by the input vector X.
+    position(dXdt, 0) = Vector2f::Zero();
+    velocity(dXdt, 0) = Vector2f::Zero();
+    cout << "n: " << n_ << endl;
+
+    for (auto i = 1u; i < n_; ++i) {
+        position(dXdt, i) = velocity(X, i);
+        velocity(dXdt, i) = fGravity2(mass);
+    }
+    
+    for (const auto& s : springs_) {
+        
+        const auto forceSum = (
+        (fDrag(velocity(X, s.i2), drag_k_) + fSpring(position(X, s.i2), position(X, s.i1), k_, 0.5f))  +
+        (fDrag(velocity(X, s.i1), drag_k_) + fSpring(position(X, s.i1), position(X, s.i2), k_, 0.5f))
+        );
+
+        velocity(dXdt, s.i1) = (velocity(dXdt, s.i1) + forceSum) / mass;
+        velocity(dXdt, s.i2) = (velocity(dXdt, s.i2) + forceSum) / mass;
+
+    };
     return dXdt;
 }
 

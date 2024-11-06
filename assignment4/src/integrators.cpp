@@ -30,7 +30,11 @@ VectorXf trapezoidStep(const ParticleSystem& ps, float dt)
 {
 	// YOUR CODE HERE (R3)
 	// Implement a trapezoid integrator.
-	return ps.state();	// No-op, replace this
+	//return ps.state();	// No-op, replace this
+	const auto f0 = ps.evalF(ps.state());
+	const auto f1 = ps.evalF(ps.state() + dt * f0);
+	return ps.state() + (dt / 2) * (f0 + f1);
+
 }
 
 VectorXf midpointStep(const ParticleSystem& ps, float dt)
