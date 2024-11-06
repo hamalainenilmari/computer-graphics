@@ -188,13 +188,11 @@ void MultiPendulumSystem::reset()
     velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
     const auto intervalX = 1.5 / n_;
     const auto intervalY = 0.1 / n_;
-    cout << "intervalX: " << intervalX << endl;
-    cout << "intervalY: " << intervalY << endl;
 
     for (auto i = 1u; i < n_; ++i) {
         position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
         velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
-        auto const spr = Spring(i-1, i, k_, 0.5f);
+        auto const spr = Spring(i-1, i, k_, (position(current_state_, i) - position(current_state_, i - 1)).norm()); // TODO check this!
         springs_.push_back(spr);
     };
 }
@@ -228,23 +226,19 @@ VectorXf MultiPendulumSystem::evalF(const VectorXf& X) const
     // As in R2, return a derivative of the system state specified by the input vector X.
     position(dXdt, 0) = Vector2f::Zero();
     velocity(dXdt, 0) = Vector2f::Zero();
-    cout << "n: " << n_ << endl;
 
     for (auto i = 1u; i < n_; ++i) {
         position(dXdt, i) = velocity(X, i);
-        velocity(dXdt, i) = fGravity2(mass);
+        velocity(dXdt, i) = (fGravity2(mass) + fDrag(velocity(X, i), drag_k_)) / mass;
     }
     
     for (const auto& s : springs_) {
         
-        const auto forceSum = (
-        (fDrag(velocity(X, s.i2), drag_k_) + fSpring(position(X, s.i2), position(X, s.i1), k_, 0.5f))  +
-        (fDrag(velocity(X, s.i1), drag_k_) + fSpring(position(X, s.i1), position(X, s.i2), k_, 0.5f))
-        );
+        const auto forceSum1 = fSpring(position(X, s.i1), position(X, s.i2), k_, s.rlen);
+        const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
 
-        velocity(dXdt, s.i1) = (velocity(dXdt, s.i1) + forceSum) / mass;
-        velocity(dXdt, s.i2) = (velocity(dXdt, s.i2) + forceSum) / mass;
-
+        velocity(dXdt, s.i1) += forceSum1 / mass;
+        velocity(dXdt, s.i2) += forceSum2 / mass;
     };
     return dXdt;
 }
