@@ -288,32 +288,96 @@ void MultiPendulumSystem::render(const VectorXf& X) const
 void ClothSystem::reset()
 {
     const auto width = 1.5f, height = 1.5f; // width and height of the whole grid
+    //const auto width = 2.0f, height = 2.0f; // width and height of the whole grid
     current_state_.setZero(6 * x_ * y_); // 3+3 floats per point
+    //current_state_.setZero(6 * 9); // 3+3 floats per point
+
+    springs_.clear(); // reset springs when resetting system
+
     // YOUR CODE HERE (R5)
     // Construct a particle system with a x_ * y_ grid of particles,
     // connected with a variety of springs as described in the handout:
     // structural springs, shear springs and flex springs.
 
-    // at first 3x3 grid = 9 particles
-    /*
-    const int n = 9;
-    const auto start_point = Vector2f(-1.5, 1.0);
+    const int n = x_*y_; // number of particles
+    const auto start_point = Vector3f(-0.75, 1.0, 0.0);
 
-    position(current_state_, 0) = start_point;  // position of point #0
-    velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
+    const auto intervalX = width / (x_-1); // interval between particles of same row
+    const auto intervalY = height / (y_-1); // interval between particles of same column
 
-    const auto intervalX = 1.5 / n;
-    const auto intervalY = 1.5 / n;
+    const auto rest_length = height / (n - 1); // rest length between particles
+
+    // pos, vel for all particles
+    auto ii = 0;
+    for (auto y = 0u; y < y_; ++y) {     // row -> same y for every particle 
+        for (auto x = 0u; x < x_; ++x) { // column -> same x for every particle
+            position(current_state_, ii) = Vector3f(-0.75 + (x * intervalX), 1.0 + ((y * intervalY)/2), 0.0);  // position of point #i
+            velocity(current_state_, ii) = Vector3f::Zero();  // velocity of point #i
+            ++ii;
+        }
+    }
     
-    for (auto i = 1u; i < n_; ++i) {
-        position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
-        velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
-        auto const spr = Spring(i - 1, i, k_, (position(current_state_, i) - position(current_state_, i - 1)).norm()); // TODO check this!
-        springs_.push_back(spr);
-    };
-    */
+    // structural springs
+    for (auto i = 0u; i < x_; ++i) { // rows
+        for (auto j = 0u; j < y_; ++j) { // columns
+            auto const index = i * y_ + j;
+            if (j < y_ - 1) {
+                // particle on right
+                auto const spr = Spring(index, index + 1, k_, rest_length);
+                springs_.push_back(spr);
+            }
 
-}
+            if (i < x_ - 1) {
+                auto const indexDown = index + x_;
+                // particle on below
+                auto const spr2 = Spring(index, indexDown, k_, rest_length);
+                springs_.push_back(spr2);
+            }
+        }
+    }
+
+    // shear springs
+    for (auto i = 0u; i < x_ - 1; ++i) { // rows
+        for (auto j = 0u; j < y_; ++j) { // columns
+            auto const index = i * y_ + j;
+            if (j == 0) { // left corner: only 1 diagonal spring
+                auto const sprDown = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
+                springs_.push_back(sprDown);
+            }
+            
+            else if (j == y_ - 1) { // right corcer: only 1 diagonal spring
+                auto const sprDown = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
+                springs_.push_back(sprDown);
+            }
+            
+            else { // 2 diagonal springs
+                auto const sprLDiagonal = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
+                auto const sprRDiagonal = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
+                springs_.push_back(sprLDiagonal);
+                springs_.push_back(sprRDiagonal);
+            }
+        }
+    }
+    
+    // flex springs
+    for (auto i = 0u; i < x_; ++i) { // rows
+        for (auto j = 0u; j < y_; ++j) { // columns
+            auto const index = i * y_ + j;
+            if (j < y_ - 2) {
+                // particle on right
+                auto const spr = Spring(index, index + 2, k_, rest_length);
+                springs_.push_back(spr);
+            }
+            
+            if (i < x_ - 2) {
+                auto const indexDown = index + 2*x_;
+                // particle on below
+                auto const spr2 = Spring(index, indexDown, k_, rest_length);
+                springs_.push_back(spr2);
+            }
+        }
+    }
+};
 
 void ClothSystem::imgui_interface()
 {
@@ -336,6 +400,41 @@ VectorXf ClothSystem::evalF(const VectorXf& X) const
     auto dXdt = VectorXf(0*X);
     // YOUR CODE HERE (R5)
     // This will be much like in R2 and R4.
+
+    // YOUR CODE HERE (R4)
+    // As in R2, return a derivative of the system state specified by the input vector X.
+    position(dXdt, 0) = Vector3f::Zero();
+    velocity(dXdt, 0) = Vector3f::Zero();
+
+    position(dXdt, x_ - 1) = Vector3f::Zero();
+    velocity(dXdt, x_ - 1) = Vector3f::Zero();
+
+    for (auto i = 0u; i < x_ * y_; ++i) {
+        if (i != 0 && i != x_ - 1) {
+            //cout << "i: " << i << endl;
+            position(dXdt, i) = velocity(X, i);
+            velocity(dXdt, i) = (fGravity3(mass) + fDrag(velocity(X, i), drag_k_)) / mass;
+        }
+    }
+    
+    for (const auto& s : springs_) {
+
+        //cout << " | spring :  " << s.i1 << " - " << s.i2 << endl;
+
+        const auto forceSum1 = fSpring(position(X, s.i1), position(X, s.i2), k_, s.rlen);
+        
+        const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
+
+        if(s.i1 != 0 && s.i1 != 19) { // Only update if not fixed
+            velocity(dXdt, s.i1) += forceSum1 / mass;
+        }
+        if (s.i2 != 0 && s.i2 != 19) { // Only update if not fixed
+            velocity(dXdt, s.i2) += forceSum2 / mass;
+        }
+       
+    }
+    
+
     return dXdt;
 }
 
@@ -374,6 +473,7 @@ void ClothSystem::render(const VectorXf& X) const
     Im3d::SetSize(LINE_WIDTH);
     for (const auto& s : springs_)
     {
+        //cout << "spring :  " << s.i1 << " - " << s.i2 << endl;
         auto p1 = position(X, s.i1);
         auto p2 = position(X, s.i2);
         Im3d::Vertex(p1(0), p1(1), p1(2));
