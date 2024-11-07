@@ -179,6 +179,7 @@ void MultiPendulumSystem::reset()
     const auto start_point = Vector2f(0.0f, 1.0f);
     Vector2f end_point = start_point + Vector2f(1.5f, 0.1f); // (1.5, 1.1)
     current_state_.setZero(4 * n_);
+    springs_.clear(); // clear string array when resetting
     // YOUR CODE HERE (R4)
     // Set the initial state for a pendulum system with n_ particles
     // connected with springs into a chain from start_point to end_point with uniform intervals.
@@ -186,15 +187,20 @@ void MultiPendulumSystem::reset()
 
     position(current_state_, 0) = start_point;  // position of point #0
     velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
-    const auto intervalX = 1.5 / n_;
-    const auto intervalY = 0.1 / n_;
+    //cout << "0.st particle at: " << position(current_state_, 0).x() << ", " << position(current_state_, 0).y() << endl;
+
+    const auto intervalX = 1.5 / (n_ - 1);
+    const auto intervalY = 0.1 / (n_ - 1);
 
     for (auto i = 1u; i < n_; ++i) {
         position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
         velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
+        //cout << i << ".th particle at: " << position(current_state_, i).x() << ", " << position(current_state_, i).y() << endl;
         auto const spr = Spring(i-1, i, k_, (position(current_state_, i) - position(current_state_, i - 1)).norm()); // TODO check this!
+        //cout << "spring of particles: " << position(current_state_, i-1).x() << ", " << position(current_state_, i-1).y() << " & " << position(current_state_, i).x() << ", " << position(current_state_, i).y() << endl;
         springs_.push_back(spr);
     };
+    cout << "--------------" << endl;
 }
 
 void MultiPendulumSystem::imgui_interface()
@@ -233,6 +239,8 @@ VectorXf MultiPendulumSystem::evalF(const VectorXf& X) const
     }
     
     for (const auto& s : springs_) {
+        
+        //cout << "n: " << n_ << " | spring :  " << s.i1 << " - " << s.i2 << endl;
         
         const auto forceSum1 = fSpring(position(X, s.i1), position(X, s.i2), k_, s.rlen);
         const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
@@ -285,6 +293,26 @@ void ClothSystem::reset()
     // Construct a particle system with a x_ * y_ grid of particles,
     // connected with a variety of springs as described in the handout:
     // structural springs, shear springs and flex springs.
+
+    // at first 3x3 grid = 9 particles
+    /*
+    const int n = 9;
+    const auto start_point = Vector2f(-1.5, 1.0);
+
+    position(current_state_, 0) = start_point;  // position of point #0
+    velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
+
+    const auto intervalX = 1.5 / n;
+    const auto intervalY = 1.5 / n;
+    
+    for (auto i = 1u; i < n_; ++i) {
+        position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
+        velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
+        auto const spr = Spring(i - 1, i, k_, (position(current_state_, i) - position(current_state_, i - 1)).norm()); // TODO check this!
+        springs_.push_back(spr);
+    };
+    */
+
 }
 
 void ClothSystem::imgui_interface()
