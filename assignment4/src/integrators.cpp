@@ -50,5 +50,15 @@ VectorXf midpointStep(const ParticleSystem& ps, float dt)
 VectorXf rk4Step(const ParticleSystem& ps, float dt)
 {
 	// EXTRA: Implement the RK4 Runge-Kutta integrator.
-	return ps.state();	// No-op, replace this
+	//return ps.state();	// No-op, replace this
+	const auto& x0 = ps.state();
+	auto k1 = ps.evalF(x0); // f0
+	VectorXf x2 = x0 + dt * 0.5f * k1;
+	auto k2 = ps.evalF(x2);
+	VectorXf x3 = x0 + dt * 0.5f * k2;
+	auto k3 = ps.evalF(x3);
+	VectorXf x4 = x0 + dt * k3;
+	auto k4 = ps.evalF(x4);
+
+	return (x0 + (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4));
 }
