@@ -305,13 +305,14 @@ void ClothSystem::reset()
     const auto intervalX = width / (x_-1); // interval between particles of same row
     const auto intervalY = height / (y_-1); // interval between particles of same column
 
-    const auto rest_length = height / (n - 1); // rest length between particles
+    const auto rest_lengthX = width / (x_); // rest length between neighboring particles in x coordinate
+    const auto rest_lengthY = height / (y_); // rest length between neighboring particles in y coordinate
 
     // pos, vel for all particles
     auto ii = 0;
     for (auto y = 0u; y < y_; ++y) {     // row -> same y for every particle 
         for (auto x = 0u; x < x_; ++x) { // column -> same x for every particle
-            position(current_state_, ii) = Vector3f(-0.75 + (x * intervalX), 1.0 + ((y * intervalY)/2), 0.0);  // position of point #i
+            position(current_state_, ii) = Vector3f(-0.75 + (x * intervalX), 1.0 + ((y * intervalY/2)), 0.0 -  y * 0.05);  // position of point #i
             velocity(current_state_, ii) = Vector3f::Zero();  // velocity of point #i
             ++ii;
         }
@@ -321,36 +322,41 @@ void ClothSystem::reset()
     for (auto i = 0u; i < x_; ++i) { // rows
         for (auto j = 0u; j < y_; ++j) { // columns
             auto const index = i * y_ + j;
-            if (j < y_ - 1) {
+            if ((j < y_ - 1) && (index + 1 < n)) {
+                //cout << "index + 1: " << index + 1 << endl;
                 // particle on right
-                auto const spr = Spring(index, index + 1, k_, rest_length);
+                auto const spr = Spring(index, index + 1, k_, (position(current_state_, index) - position(current_state_, index + 1)).norm());
                 springs_.push_back(spr);
             }
 
             if (i < x_ - 1) {
                 auto const indexDown = index + x_;
+                //cout << "indexDown: " << indexDown << endl;
                 // particle on below
-                auto const spr2 = Spring(index, indexDown, k_, rest_length);
+                auto const spr2 = Spring(index, indexDown, k_, (position(current_state_, index) - position(current_state_, indexDown)).norm());
                 springs_.push_back(spr2);
             }
         }
     }
-
+    
     // shear springs
     for (auto i = 0u; i < x_ - 1; ++i) { // rows
         for (auto j = 0u; j < y_; ++j) { // columns
             auto const index = i * y_ + j;
             if (j == 0) { // left corner: only 1 diagonal spring
+                //cout << "index: " << index << " diagonal: " << index + x_ + 1 << endl;
                 auto const sprDown = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
                 springs_.push_back(sprDown);
             }
             
             else if (j == y_ - 1) { // right corcer: only 1 diagonal spring
+                //cout << "index: " << index << " diagonal: " << index + x_ - 1 << endl;
                 auto const sprDown = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
                 springs_.push_back(sprDown);
             }
             
             else { // 2 diagonal springs
+                //cout << "index: " << index << " diagonals: " << index + x_ + 1 << " -- " << index + x_ - 1 << endl;
                 auto const sprLDiagonal = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
                 auto const sprRDiagonal = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
                 springs_.push_back(sprLDiagonal);
@@ -363,17 +369,22 @@ void ClothSystem::reset()
     for (auto i = 0u; i < x_; ++i) { // rows
         for (auto j = 0u; j < y_; ++j) { // columns
             auto const index = i * y_ + j;
-            if (j < y_ - 2) {
-                // particle on right
-                auto const spr = Spring(index, index + 2, k_, rest_length);
-                springs_.push_back(spr);
-            }
-            
-            if (i < x_ - 2) {
-                auto const indexDown = index + 2*x_;
-                // particle on below
-                auto const spr2 = Spring(index, indexDown, k_, rest_length);
-                springs_.push_back(spr2);
+            if (index < n) {
+                if (j < y_ - 2) {
+                    // particle on right
+                    auto const spr = Spring(index, index + 2, k_, (position(current_state_, index) - position(current_state_, index + 2)).norm());
+                    springs_.push_back(spr);
+                }
+
+                if (i < x_ - 2) {
+                    auto const indexDown = index + 2 * x_;
+                    if (indexDown < n) {
+                        // particle on below
+                        //cout << "index: " << index << " flex spring: " << indexDown << endl;
+                        auto const spr2 = Spring(index, indexDown, k_, (position(current_state_, index) - position(current_state_, indexDown)).norm());
+                        springs_.push_back(spr2);
+                    }
+                }
             }
         }
     }
@@ -425,10 +436,12 @@ VectorXf ClothSystem::evalF(const VectorXf& X) const
         
         const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
 
-        if(s.i1 != 0 && s.i1 != 19) { // Only update if not fixed
+        //cout << "forcesums :  " << forceSum1 << " -- " << forceSum2 << endl;
+        // dont update top corners fixed particles
+        if(s.i1 != 0 && s.i1 != x_ - 1) { 
             velocity(dXdt, s.i1) += forceSum1 / mass;
         }
-        if (s.i2 != 0 && s.i2 != 19) { // Only update if not fixed
+        if (s.i2 != 0 && s.i2 != x_ -1) { 
             velocity(dXdt, s.i2) += forceSum2 / mass;
         }
        
@@ -481,3 +494,85 @@ void ClothSystem::render(const VectorXf& X) const
     }
     Im3d::End();
 }
+
+
+/*
+void SprinklerSystem::reset()
+{
+    current_state_.setZero(4 * n_); // n particles
+  
+    alive_particles_.clear();
+
+    const auto start_point = Vector2f(0, -1.0);
+    for (auto i = 0u; i < n_; ++i) {
+        //cout << "particle number: " << i << endl;
+        position(current_state_, i) = Vector2f(0.0, 0.0);  // position of point #i
+        velocity(current_state_, i) = Vector2f(0.0 + i * spread_, 5.0);  // velocity of point #i
+    }
+
+}
+
+void SprinklerSystem::emit()
+{
+    const int emitPerFrame = 5;
+    int iEmissions = 0;
+
+    Vector2f emittorPos(0.0, 0.0);
+    while (iEmissions < emitPerFrame) {
+        auto p = Particle(0);
+        alive_particles_.push_back(p);
+        ++iEmissions;
+    }
+}
+
+void SprinklerSystem::update()
+{
+    const int emitPerFrame = 5;
+    const int n = alive_particles_.size();
+
+    alive_particles_.erase(
+        std::remove_if(alive_particles_.begin(), alive_particles_.end(),
+            [](const Particle& p) { return p.getAge() > 0.5; }),
+        alive_particles_.end());
+
+    for (auto& particle : alive_particles_) {
+        const int age = particle.getAge();
+        particle.setAge(age + 0.1);
+    }
+}
+
+// the derivative at state (x,y) is (-y, x)
+VectorXf SprinklerSystem::evalF(const VectorXf& X) const
+{
+    static const auto mass = 0.025f;
+    auto dXdt = VectorXf(0 * X);
+
+    for (auto i = 0u; i < alive_particles_.size(); ++i) {
+        position(dXdt, i) = velocity(X, i);
+        velocity(dXdt, i) = (fGravity2(mass) + fDrag(velocity(X, i), drag_k_)) / mass;
+    }
+
+    return dXdt;
+}
+
+// draw the state X, as well as lines that mark the path of the actual solution
+void SprinklerSystem::render(const VectorXf& X) const
+{
+    Im3d::BeginPoints();
+    Im3d::SetSize(POINT_SIZE);
+    for (auto i = 0u; i < n_; ++i)
+    {   
+        cout << "point: " << i << endl;
+        Vector2f p = position(X, i);
+        Im3d::Vertex(p(0), p(1), 0.0f);
+    }
+    Im3d::End();
+}
+
+string SprinklerSystem::dimension_name(unsigned d) const
+{
+    static array<string, 2> names = { "x", "y" };
+    return names[d];
+}
+
+*/
