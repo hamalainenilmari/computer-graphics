@@ -71,7 +71,8 @@ namespace {
 
 App::App(void)
     : pendulum_system_(4),
-      cloth_system_(20,20)
+      cloth_system_(20, 20),
+      sprinkler_system_(10)
 {
     if (static_instance_ != 0)
         fail("Attempting to create a second instance of App!");
@@ -151,13 +152,14 @@ void App::run()
     integrator2index[MIDPOINT_INTEGRATOR] = 2;
     integrator2index[RK4_INTEGRATOR] = 3;
 
-    static array<const char*, 4> system_list = { "Simple (1)", "Spring (2)", "Multi-pendulum (3)", "Cloth (4)" };
-    static array<ParticleSystemType, 4> name2system = { SIMPLE_SYSTEM, SPRING_SYSTEM, PENDULUM_SYSTEM, CLOTH_SYSTEM };
+    static array<const char*, 5> system_list = { "Simple (1)", "Spring (2)", "Multi-pendulum (3)", "Cloth (4)", "Sprinkler (5)"};
+    static array<ParticleSystemType, 5> name2system = { SIMPLE_SYSTEM, SPRING_SYSTEM, PENDULUM_SYSTEM, CLOTH_SYSTEM, SPRINKLER_SYSTEM};
     static map<ParticleSystemType, int> system2index;
     system2index[SIMPLE_SYSTEM] = 0;
     system2index[SPRING_SYSTEM] = 1;
     system2index[PENDULUM_SYSTEM] = 2;
     system2index[CLOTH_SYSTEM] = 3;
+    system2index[SPRINKLER_SYSTEM] = 4;
 
     // MAIN LOOP
     while (!glfwWindowShouldClose(window_))
@@ -203,6 +205,8 @@ void App::run()
                     ps_ = &pendulum_system_; break;
                 case CLOTH_SYSTEM:
                     ps_ = &cloth_system_; break;
+                case SPRINKLER_SYSTEM:
+                    ps_ = &sprinkler_system_; break;
                 default:
                     assert(false && "invalid system type");
                 }
@@ -310,18 +314,25 @@ void App::run()
 void App::step()
 {
     for (int i = 0; i < steps_per_update_; ++i) {
-        switch (integrator_)
-        {			
-        case EULER_INTEGRATOR:
-            stepSystem(*ps_, eulerStep, step_); break;
-        case TRAPEZOID_INTEGRATOR:
-            stepSystem(*ps_, trapezoidStep, step_); break;
-        case MIDPOINT_INTEGRATOR:
-            stepSystem(*ps_, midpointStep, step_); break;
-        case RK4_INTEGRATOR:
-            stepSystem(*ps_, rk4Step, step_); break;
-        default:
-            assert(false && " invalid integrator type");
+        // sprinkler only uses the simple integrator for the sake of simplicity 
+        if (SprinklerSystem* sprinkler = dynamic_cast<SprinklerSystem*>(ps_)) {
+            sprinkler->update(step_);
+            sprinkler->emit();
+        }
+        else {
+            switch (integrator_)
+            {
+            case EULER_INTEGRATOR:
+                stepSystem(*ps_, eulerStep, step_); break;
+            case TRAPEZOID_INTEGRATOR:
+                stepSystem(*ps_, trapezoidStep, step_); break;
+            case MIDPOINT_INTEGRATOR:
+                stepSystem(*ps_, midpointStep, step_); break;
+            case RK4_INTEGRATOR:
+                stepSystem(*ps_, rk4Step, step_); break;
+            default:
+                assert(false && " invalid integrator type");
+            }
         }
     }
 }
@@ -420,13 +431,36 @@ void App::render(int window_width, int window_height, vector<string>& vecStatusM
         ps_->render(ps_->state());
 
     if (ps_type_ == CLOTH_SYSTEM && shading_toggle_) {
-        // EXTRA: Render cloth surface.
+        ps_->render(ps_->state());
+        /*
+        const int gridSize = 400;
+        const auto& vertices = ps_->state();
 
-    }
+        const auto& springs = ps_->springs();
 
-    // Undo our bindings.
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+        
+        vector<Vertex> positions(400);
+        for (auto i = 0u; i < 400; ++i) {
+            positions[i].position = ClothSystem::position(vertices, i);
+        }
+
+        glPointSize(5.0f);
+
+        glBindBuffer(GL_ARRAY_BUFFER, gl_.vertex_buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * positions.size(), positions.data(), GL_DYNAMIC_DRAW);
+
+        glUseProgram(gl_.shader_program);
+        glUniformMatrix4fv(gl_.world_to_clip_uniform, 1, GL_FALSE, worldToClip.data());
+
+        glBindVertexArray(gl_.mesh_vao);
+
+        glDrawElements(GL_TRIANGLES, (int)positions.size(), GL_UNSIGNED_INT, 0);
+        // unbind.
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        */
+        
+    }    
     glUseProgram(0);
 
     Im3d_EndFrame();
@@ -467,6 +501,12 @@ void App::handleKeypress(GLFWwindow* window, int key, int scancode, int action, 
         {
             ps_ = &cloth_system_;
             ps_type_ = CLOTH_SYSTEM;
+            ps_->reset();
+        }
+        else if (key == GLFW_KEY_5)
+        {
+            ps_ = &sprinkler_system_;
+            ps_type_ = SPRINKLER_SYSTEM;
             ps_->reset();
         }
         else if (key == GLFW_KEY_F1)

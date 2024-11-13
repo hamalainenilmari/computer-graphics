@@ -24,6 +24,7 @@ using namespace Eigen;      // enables writing "Vector3f" instead of "Eigen::Vec
 
 #include "particle_system.h"
 
+
 struct Vertex
 {
 	Vector3f position;
@@ -35,6 +36,7 @@ struct glGeneratedIndices
 	GLuint point_vao, mesh_vao;
 	GLuint shader_program;
 	GLuint vertex_buffer;
+	GLuint index_buffer;
 	GLuint model_to_world_uniform, world_to_clip_uniform;
 };
 
@@ -47,6 +49,7 @@ private:
 		SPRING_SYSTEM,
 		PENDULUM_SYSTEM,
 		CLOTH_SYSTEM,
+		SPRINKLER_SYSTEM,
 		//COMPUTE_CLOTH
 	};
 	enum IntegratorType
@@ -95,6 +98,7 @@ private:
 	SpringSystem		spring_system_;
 	MultiPendulumSystem	pendulum_system_;
 	ClothSystem			cloth_system_;
+	SprinklerSystem     sprinkler_system_;
 
 	// ------------------------------------------
 	static GLFWkeyfun           default_key_callback_;

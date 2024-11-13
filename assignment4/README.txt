@@ -4,8 +4,8 @@
 
 Student name: Ilmari Hämäläinen
 Student number: 894931
-Hours spent on requirements (approx.): 1
-Hours spent on extra credit (approx.):
+Hours spent on requirements (approx.): 16
+Hours spent on extra credit (approx.): 16
 
 # First, a 10-second poll about this assignment period:
 
@@ -18,14 +18,17 @@ Did you work on the assignment using Aalto computers, your own computers, or bot
 # and leave your 'attempt' code in place (commented out if necessary) so we can see it.
 
      R1 Euler integrator (1p): done
-        R2 Spring system (2p): not done
- R3 Trapezoid integrator (2p): not done
-      R4 Pendulum system (2p): not done
-         R5 Cloth system (3p): not done
+        R2 Spring system (2p): done
+ R3 Trapezoid integrator (2p): done
+      R4 Pendulum system (2p): done
+         R5 Cloth system (3p): done
 
 # Did you do any extra credit work?
 
 (Describe what you did and, if there was a substantial amount of work involved, how you did it. Also describe how to use/activate your extra features, if they are interactive.)
+- RK4 (2p extra)
+- Sprikler system (1-3p extra): water sprinkler located on the bottom middle of the screen.
+- Particle rendering (1-4p extra): just a simple randomized shade of blue color for each particle to look more like water, tried also to render the cloth as meshes but ran out of time (commented out)
 
 # Are there any known problems/bugs remaining in your code?
 
@@ -39,3 +42,4 @@ Did you work on the assignment using Aalto computers, your own computers, or bot
 
 (Was the assignment too long? Too hard? Fun or boring? Did you learn something, or was it a total waste of time? Can we do something differently to help you learn? Please be brutally honest; we won't take it personally.)
 
+very fun.

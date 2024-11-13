@@ -187,7 +187,6 @@ void MultiPendulumSystem::reset()
 
     position(current_state_, 0) = start_point;  // position of point #0
     velocity(current_state_, 0) = Vector2f::Zero();  // velocity of point #0
-    //cout << "0.st particle at: " << position(current_state_, 0).x() << ", " << position(current_state_, 0).y() << endl;
 
     const auto intervalX = 1.5 / (n_ - 1);
     const auto intervalY = 0.1 / (n_ - 1);
@@ -195,12 +194,9 @@ void MultiPendulumSystem::reset()
     for (auto i = 1u; i < n_; ++i) {
         position(current_state_, i) = Vector2f(i * intervalX, 1.0 + i * intervalY);  // position of point #i
         velocity(current_state_, i) = Vector2f::Zero();  // velocity of point #i
-        //cout << i << ".th particle at: " << position(current_state_, i).x() << ", " << position(current_state_, i).y() << endl;
         auto const spr = Spring(i-1, i, k_, (position(current_state_, i) - position(current_state_, i - 1)).norm()); // TODO check this!
-        //cout << "spring of particles: " << position(current_state_, i-1).x() << ", " << position(current_state_, i-1).y() << " & " << position(current_state_, i).x() << ", " << position(current_state_, i).y() << endl;
         springs_.push_back(spr);
     };
-    cout << "--------------" << endl;
 }
 
 void MultiPendulumSystem::imgui_interface()
@@ -239,8 +235,6 @@ VectorXf MultiPendulumSystem::evalF(const VectorXf& X) const
     }
     
     for (const auto& s : springs_) {
-        
-        //cout << "n: " << n_ << " | spring :  " << s.i1 << " - " << s.i2 << endl;
         
         const auto forceSum1 = fSpring(position(X, s.i1), position(X, s.i2), k_, s.rlen);
         const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
@@ -323,7 +317,6 @@ void ClothSystem::reset()
         for (auto j = 0u; j < y_; ++j) { // columns
             auto const index = i * y_ + j;
             if ((j < y_ - 1) && (index + 1 < n)) {
-                //cout << "index + 1: " << index + 1 << endl;
                 // particle on right
                 auto const spr = Spring(index, index + 1, k_, (position(current_state_, index) - position(current_state_, index + 1)).norm());
                 springs_.push_back(spr);
@@ -331,7 +324,6 @@ void ClothSystem::reset()
 
             if (i < x_ - 1) {
                 auto const indexDown = index + x_;
-                //cout << "indexDown: " << indexDown << endl;
                 // particle on below
                 auto const spr2 = Spring(index, indexDown, k_, (position(current_state_, index) - position(current_state_, indexDown)).norm());
                 springs_.push_back(spr2);
@@ -344,19 +336,16 @@ void ClothSystem::reset()
         for (auto j = 0u; j < y_; ++j) { // columns
             auto const index = i * y_ + j;
             if (j == 0) { // left corner: only 1 diagonal spring
-                //cout << "index: " << index << " diagonal: " << index + x_ + 1 << endl;
                 auto const sprDown = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
                 springs_.push_back(sprDown);
             }
             
             else if (j == y_ - 1) { // right corcer: only 1 diagonal spring
-                //cout << "index: " << index << " diagonal: " << index + x_ - 1 << endl;
                 auto const sprDown = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
                 springs_.push_back(sprDown);
             }
             
             else { // 2 diagonal springs
-                //cout << "index: " << index << " diagonals: " << index + x_ + 1 << " -- " << index + x_ - 1 << endl;
                 auto const sprLDiagonal = Spring(index, index + x_ + 1, k_, (position(current_state_, index) - position(current_state_, index + x_ + 1)).norm());
                 auto const sprRDiagonal = Spring(index, index + x_ - 1, k_, (position(current_state_, index) - position(current_state_, index + x_ - 1)).norm());
                 springs_.push_back(sprLDiagonal);
@@ -380,7 +369,6 @@ void ClothSystem::reset()
                     auto const indexDown = index + 2 * x_;
                     if (indexDown < n) {
                         // particle on below
-                        //cout << "index: " << index << " flex spring: " << indexDown << endl;
                         auto const spr2 = Spring(index, indexDown, k_, (position(current_state_, index) - position(current_state_, indexDown)).norm());
                         springs_.push_back(spr2);
                     }
@@ -422,7 +410,6 @@ VectorXf ClothSystem::evalF(const VectorXf& X) const
 
     for (auto i = 0u; i < x_ * y_; ++i) {
         if (i != 0 && i != x_ - 1) {
-            //cout << "i: " << i << endl;
             position(dXdt, i) = velocity(X, i);
             velocity(dXdt, i) = (fGravity3(mass) + fDrag(velocity(X, i), drag_k_)) / mass;
         }
@@ -430,13 +417,10 @@ VectorXf ClothSystem::evalF(const VectorXf& X) const
     
     for (const auto& s : springs_) {
 
-        //cout << " | spring :  " << s.i1 << " - " << s.i2 << endl;
-
         const auto forceSum1 = fSpring(position(X, s.i1), position(X, s.i2), k_, s.rlen);
         
         const auto forceSum2 = fSpring(position(X, s.i2), position(X, s.i1), k_, s.rlen);
 
-        //cout << "forcesums :  " << forceSum1 << " -- " << forceSum2 << endl;
         // dont update top corners fixed particles
         if(s.i1 != 0 && s.i1 != x_ - 1) { 
             velocity(dXdt, s.i1) += forceSum1 / mass;
@@ -486,7 +470,6 @@ void ClothSystem::render(const VectorXf& X) const
     Im3d::SetSize(LINE_WIDTH);
     for (const auto& s : springs_)
     {
-        //cout << "spring :  " << s.i1 << " - " << s.i2 << endl;
         auto p1 = position(X, s.i1);
         auto p2 = position(X, s.i2);
         Im3d::Vertex(p1(0), p1(1), p1(2));
@@ -496,75 +479,83 @@ void ClothSystem::render(const VectorXf& X) const
 }
 
 
-/*
+// sprinkler
 void SprinklerSystem::reset()
 {
-    current_state_.setZero(4 * n_); // n particles
-  
+    current_state_.setZero(6 * n_); // n particles
     alive_particles_.clear();
-
-    const auto start_point = Vector2f(0, -1.0);
-    for (auto i = 0u; i < n_; ++i) {
-        //cout << "particle number: " << i << endl;
-        position(current_state_, i) = Vector2f(0.0, 0.0);  // position of point #i
-        velocity(current_state_, i) = Vector2f(0.0 + i * spread_, 5.0);  // velocity of point #i
-    }
-
 }
 
+// create new particles in each time step
 void SprinklerSystem::emit()
 {
-    const int emitPerFrame = 5;
+    const int emitPerFrame = 2;
     int iEmissions = 0;
 
-    Vector2f emittorPos(0.0, 0.0);
+    Vector3f emittorPos(0.0f, -0.5f, 0.0f);
+
+    float minAngle = 3.14159265f / 3.0f;
+    float maxAngle = 2.0f * 3.14159265f / 3.0f;
+
+    float angle = (static_cast<float>(rand()) / RAND_MAX) * (maxAngle - minAngle) + minAngle;
+    float speed = 1.0f + static_cast<float>(rand()) / RAND_MAX;
+
+
     while (iEmissions < emitPerFrame) {
-        auto p = Particle(0);
+        auto p = Particle();
+        p.setPosition(emittorPos);
+        p.setVelocity(Vector3f(speed * cos(angle), speed * sin(angle), speed * (static_cast<float>(rand()) / RAND_MAX - 0.5f)/5));
+
+        p.setColor(Vector3f(0.0f, 0.0f, 0.5f + static_cast<float>(rand()) / RAND_MAX * 0.1f));
+
         alive_particles_.push_back(p);
+
         ++iEmissions;
     }
 }
 
-void SprinklerSystem::update()
+// update particle ages in each time step
+void SprinklerSystem::update(float dt)
 {
-    const int emitPerFrame = 5;
-    const int n = alive_particles_.size();
+    static const auto mass = 0.1f;
 
     alive_particles_.erase(
-        std::remove_if(alive_particles_.begin(), alive_particles_.end(),
-            [](const Particle& p) { return p.getAge() > 0.5; }),
+        remove_if(alive_particles_.begin(), alive_particles_.end(),
+            [](const Particle& p) { return p.getAge() > 2.0; }),
         alive_particles_.end());
 
     for (auto& particle : alive_particles_) {
-        const int age = particle.getAge();
-        particle.setAge(age + 0.1);
+        const float age = particle.getAge();
+        particle.setAge(age + dt);
+
+        particle.setVelocity(particle.getVelocity() + fGravity3(mass) * dt);
+        particle.setPosition(particle.getPosition() + particle.getVelocity() * dt);
+        
     }
 }
 
-// the derivative at state (x,y) is (-y, x)
+
 VectorXf SprinklerSystem::evalF(const VectorXf& X) const
 {
     static const auto mass = 0.025f;
-    auto dXdt = VectorXf(0 * X);
-
-    for (auto i = 0u; i < alive_particles_.size(); ++i) {
-        position(dXdt, i) = velocity(X, i);
-        velocity(dXdt, i) = (fGravity2(mass) + fDrag(velocity(X, i), drag_k_)) / mass;
-    }
+    VectorXf dXdt(6 * alive_particles_.size());
 
     return dXdt;
 }
 
-// draw the state X, as well as lines that mark the path of the actual solution
+
 void SprinklerSystem::render(const VectorXf& X) const
 {
     Im3d::BeginPoints();
-    Im3d::SetSize(POINT_SIZE);
-    for (auto i = 0u; i < n_; ++i)
+    Im3d::SetSize(POINT_SIZE / 2.5);
+    for (auto i = 0u; i < alive_particles_.size(); ++i)
     {   
-        cout << "point: " << i << endl;
-        Vector2f p = position(X, i);
-        Im3d::Vertex(p(0), p(1), 0.0f);
+        Vector3f p = alive_particles_[i].getPosition();
+
+        Vector3f color = alive_particles_[i].getColor();
+        Im3d::SetColor(Im3d::Color(color(0), color(1), color(2)));
+
+        Im3d::Vertex(p(0), p(1), p(2));
     }
     Im3d::End();
 }
@@ -574,5 +565,3 @@ string SprinklerSystem::dimension_name(unsigned d) const
     static array<string, 2> names = { "x", "y" };
     return names[d];
 }
-
-*/

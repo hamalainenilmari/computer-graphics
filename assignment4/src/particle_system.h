@@ -24,6 +24,7 @@ public:
 
     // Get/set current state
     const VectorXf&			state() const { return current_state_; }
+    const vector<Spring>&   springs() const { return springs_; }
     void					set_state(const VectorXf& s) { current_state_ = s; }
 
     // Render system as points and lines using Im3d.
@@ -40,6 +41,7 @@ public:
 
 protected:
     VectorXf				current_state_;
+    vector<Spring>			springs_;
 };
 
 
@@ -126,6 +128,7 @@ public:
     static auto             position(const VectorXf& X, int idx)    { return Map<const Vector3f>(&X(idx * 6)); }
     static auto             velocity(VectorXf& X, int idx)          { return Map<Vector3f>(&X(idx * 6 + 3)); }
     static auto             velocity(const VectorXf& X, int idx)    { return Map<const Vector3f>(&X(idx * 6 + 3)); }
+    //const  vector<Spring>& getSprings() const { return springs_; }
 
     void					reset() override;
     void					render(const VectorXf& X) const override;
@@ -139,4 +142,56 @@ private:
     vector<Spring>			springs_;
     float					k_ = 300.0f;		// spring constant
     float					drag_k_ = 0.08f;	// dragf coefficient
+};
+
+
+
+class Particle {
+public:
+    Particle() { age = 0; };
+    void setAge(float a) { age = a; }
+    float getAge() const { return age; }
+
+    void setPosition(Vector3f pos) { position = pos; }
+    Vector3f getPosition() const { return position; }
+
+    void setVelocity(Vector3f v) { velocity = v; }
+    Vector3f getVelocity() const { return velocity; }
+
+    Vector3f getColor() const { return color_; }
+    void setColor(const Vector3f& c) { color_ = c; }
+
+private:
+    float age;
+    Vector3f color_;
+    Vector3f position;
+    Vector3f velocity;
+};
+
+class SprinklerSystem : public ParticleSystem
+{
+public:
+    SprinklerSystem(unsigned n) { n_ = n;  reset(); }
+
+    VectorXf				evalF(const VectorXf& X) const override;
+    
+    static auto             position(VectorXf& X, int idx) { return Map<Vector3f>(&X(idx * 6)); }
+    static auto             position(const VectorXf& X, int idx) { return Map<const Vector3f>(&X(idx * 6)); }
+    static auto             velocity(VectorXf& X, int idx) { return Map<Vector3f>(&X(idx * 6 + 3)); }
+    static auto             velocity(const VectorXf& X, int idx) { return Map<const Vector3f>(&X(idx * 6 + 3)); }
+
+    void					reset() override;
+    void					render(const VectorXf& X) const override;
+    string					dimension_name(unsigned d) const override;
+    void                    emit();
+    void                    update(float dt);
+
+private:
+    unsigned				n_;
+    float					radius_ = 0.5f;
+    float                   spread_ = 0.1f;
+    float                   colorSpread_ = 0.1f;
+    float					drag_k_ = 0.08f;	// dragf coefficient
+
+    vector<Particle>				alive_particles_;
 };
