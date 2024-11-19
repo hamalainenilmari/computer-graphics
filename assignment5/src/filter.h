@@ -1,6 +1,5 @@
 #pragma once
 
-#include "film.h"
 #include "args.h"
 
 class Filter

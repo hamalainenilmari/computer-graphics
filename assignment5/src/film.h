@@ -1,8 +1,7 @@
 #pragma once
 
 #include "image.h"
-
-class Filter;
+#include "filter.h"
 
 // A helper class for super-sampling and smart filtering.
 

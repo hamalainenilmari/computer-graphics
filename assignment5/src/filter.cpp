@@ -13,6 +13,7 @@ using namespace Eigen;
 using namespace std;
 
 #include "filter.h"
+#include "vec_utils.h"
 
 Filter::Filter() {}
 

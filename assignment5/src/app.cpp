@@ -197,10 +197,15 @@ void App::run()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        
+        // For MacOS's weird display scaling
+        auto s = io_->DisplayFramebufferScale;
+        float xscale = s.x;
+        float yscale = s.y;
 
         int width, height;
         glfwGetFramebufferSize(window_, &width, &height);
-        int render_width = width - gui_width_;
+        int render_width = width - gui_width_*xscale;
 
         ImGui::SetNextWindowPos(ImVec2(gui_width_, 0));
         ImGui::SetNextWindowSize(ImVec2(render_width, height));
@@ -209,20 +214,25 @@ void App::run()
         ImGui::Begin("Render surface", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs);
 
         // Set render area window
-        glViewport(gui_width_, 0, render_width, height);
+        glViewport(gui_width_*xscale, 0, render_width, height);
 
         // Clear screen.
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (display_results_)
-            ImGui::Image((ImTextureID)(intptr_t)gl_texture_, ImVec2(render_width, height));
+            ImGui::Image((ImTextureID)(intptr_t)gl_texture_, ImVec2(render_width/xscale, height/yscale));
         else
             render(render_width, height, vecStatusMessages);
 
         ImGui::End();
 
         ImGui::PopStyleVar();
+        
+        //{
+        //    vecStatusMessages.push_back(fmt::format("Display scale {}x, {}x", xscale, yscale));
+        //    vecStatusMessages.push_back(fmt::format("Viewport {}x{}", width, height));
+        //}
 
         // Begin GUI window
         ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -239,7 +249,6 @@ void App::run()
             {
                 int start_x = 100;
                 int width = 250;
-
 
                 ImGui::SetCursorPosX(start_x);
                 ImGui::SetNextItemWidth(width);

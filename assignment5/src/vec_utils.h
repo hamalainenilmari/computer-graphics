@@ -11,7 +11,7 @@ inline typename DerivedInput::PlainObject clip(const MatrixBase<DerivedInput>& a
 template<typename Derived>
 inline typename Derived::PlainObject clip(const MatrixBase<Derived>& a, typename Derived::Scalar low, typename Derived::Scalar high)
 {
-    return Derived::PlainObject(a.cwiseMin(high).cwiseMax(low));
+    return typename Derived::PlainObject(a.cwiseMin(high).cwiseMax(low));
 }
 
 template<typename T>

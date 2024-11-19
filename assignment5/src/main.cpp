@@ -25,7 +25,10 @@ using namespace std;
 #include <fstream>
 #include <execution>
 #include <set>
+
+#ifdef CS_C3100_USE_OPENMP
 #include <omp.h>
+#endif
 
 #include "vec_utils.h"
 #include "film.h"
@@ -121,6 +124,7 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
     //          Fire rays and get shaded results
     //          Accumulate into image
 
+#ifdef CS_C3100_USE_OPENMP
     // Set up number of threads as desired.
     int num_threads = 1;
     if (parallelize)
@@ -128,14 +132,22 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
     omp_set_num_threads(num_threads);
 
     cout << "Using " << num_threads << " threads" << endl;
+#endif
 
     // Loop over scanlines.
+#ifdef CS_C3100_USE_OPENMP
     #pragma omp parallel for
+#endif
     for (int j = 0; j < args.height; ++j)
     {
         // Print progress info
+#ifdef CS_C3100_USE_OPENMP
         if (omp_get_thread_num() == 0 && args.show_progress)
             ::printf("%.2f%% \r", lines_done * 100.0f / image_size(1));
+#else
+        if (args.show_progress)
+            ::printf("%.2f%% \r", lines_done * 100.0f / image_size(1));
+#endif
 
         // Construct sampler for this scanline.
         // Done this way so that we can retain determinism even when running parallel for loops.

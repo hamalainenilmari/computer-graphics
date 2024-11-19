@@ -32,9 +32,14 @@ find_package(fmt REQUIRED)
 find_package(unofficial-im3d REQUIRED)
 find_package(implot REQUIRED)
 find_package(lodepng REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
 
-set(C3100_COMMON_DEPENDENCIES glfw imgui::imgui Eigen3::Eigen nfd::nfd fmt::fmt unofficial::im3d::im3d implot::implot lodepng OpenMP::OpenMP_CXX)
+set(C3100_COMMON_DEPENDENCIES glfw imgui::imgui Eigen3::Eigen nfd::nfd fmt::fmt unofficial::im3d::im3d implot::implot lodepng)
+
+if(OpenMP_CXX_FOUND)
+  set(C3100_COMMON_DEPENDENCIES ${C3100_COMMON_DEPENDENCIES} OpenMP::OpenMP_CXX)
+  add_compile_options(-DCS_C3100_USE_OPENMP)
+endif()
 
 if(!WIN32)
   find_package(OpenGL REQUIRED)
