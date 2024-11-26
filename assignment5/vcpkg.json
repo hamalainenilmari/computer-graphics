@@ -1,0 +1,52 @@
+{
+  "dependencies": [
+    "eigen3",
+    "glfw3",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding"
+      ]
+    },
+    "nativefiledialog-extended",
+    "fmt",
+    "im3d",
+    "implot",
+    "lodepng"
+  ],
+  "overrides": [
+    {
+      "name": "eigen3",
+      "version": "3.4.0"
+    },
+    {
+      "name": "imgui",
+      "version": "1.91.0"
+    },
+    {
+      "name": "glfw3",
+      "version": "3.4"
+    },
+    {
+      "name": "nativefiledialog-extended",
+      "version": "1.2.0"
+    },
+    {
+      "name": "fmt",
+      "version": "11.0.2"
+    },
+    {
+      "name": "im3d",
+      "version": "2022-10-11#0"
+    },
+    {
+      "name": "implot",
+      "version": "0.16#0"
+    },
+    {
+      "name": "lodepng",
+      "version": "2021-12-04#1"
+    }
+  ],
+  "builtin-baseline": "85392b146fdbdb1ef68cb3bfd48e9ee9a6311064"
+}
