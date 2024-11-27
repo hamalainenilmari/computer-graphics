@@ -194,8 +194,8 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
 
                 if (args.display_uv)
                 {
-                    float intervalX = 1.0 / args.width;
-                    float intervalY = 1.0 / args.height;
+                    float intervalX = 1.0 / (args.width - 1);
+                    float intervalY = 1.0 / (args.height - 1);
                     float red = 0.0 + i * intervalX;
                     float green = 0.0 + j * intervalY;
                     sample_color = Vector3f(red, green, 1.0);
