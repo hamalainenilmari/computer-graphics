@@ -192,9 +192,14 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                 // should linearly increase from 0 to 1 as the y coordinate increases from 0 to args.height. Since
                 // our image is two-dimensional we can't map blue to a simple linear function and just set it to 1.
 
-                //if (args.display_uv)
-                //	sample_color = ...
-
+                if (args.display_uv)
+                {
+                    float intervalX = 1.0 / args.width;
+                    float intervalY = 1.0 / args.height;
+                    float red = 0.0 + i * intervalX;
+                    float green = 0.0 + j * intervalY;
+                    sample_color = Vector3f(red, green, 1.0);
+                };
 
                 // YOUR CODE HERE (R9)
                 // This starter code only supports one sample per pixel and consequently directly

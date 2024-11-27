@@ -3,21 +3,22 @@
 #
 # Assignment 5: Ray Tracing
 
-Student name:
-Student number:
-Hours spent on requirements (approx.):
+Student name: Ilmari Hämäläinen
+Student number: 894931
+Hours spent on requirements (approx.): 1
 Hours spent on extra credit (approx.):
 
 # First, a 10-second poll about this assignment period:
 
 Did you work on the assignment using Aalto computers, your own computers, or both?
+	- own windows laptop
 
 # Which parts of the assignment did you complete? Mark them 'done'.
 # You can also mark non-completed parts as 'attempted' if you spent a fair amount of
 # effort on them. If you do, explain the work you did in the problems/bugs section
 # and leave your 'attempt' code in place (commented out if necessary) so we can see it.
 
-R0 Displaying image coordinates       (0.5p): not done
+R0 Displaying image coordinates       (0.5p): done
 R1 Generating rays & ambient lighting (1.5p): not done
 R2 Visualizing depth		          (  1p): not done
 R3 Perspective camera		          (1.5p): not done
