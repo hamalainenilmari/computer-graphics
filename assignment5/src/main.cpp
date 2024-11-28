@@ -221,7 +221,15 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                     // YOUR CODE HERE (R2)
                     // Here you should linearly map the t range [depth_min, depth_max] to the inverted range [1,0] for visualization
                     // Note the inversion; closer objects should appear brighter.
-                    float f = 0.0f;     // change this
+                    args.depth_min;
+                    args.depth_max;
+                    s.x();
+                    float depthZ = 1.0f - 0.5f * (hit.t / args.depth_min);
+                    float depthY = 1.0f - 0.5f * (hit.t / args.depth_max);
+
+                    float f = 1.0f - (hit.t - args.depth_min) / (args.depth_max - args.depth_min);
+                    //float f = 0.0f;     // change this
+                    
                     depth_image->pixel(i, j) = Vector4f{ f, f, f, 1.0f };
                 }
                 if (normal_image)

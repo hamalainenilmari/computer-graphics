@@ -78,7 +78,12 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// YOUR CODE HERE (R1)
 	// Apply ambient lighting using the ambient light of the scene
 	// and the diffuse color of the material.
-	Vector3f answer = Vector3f::Ones();
+	
+	Vector3f answer = Vector3f(
+		scene_.getAmbientLight().x() * m->diffuse_color(point).x(),
+		scene_.getAmbientLight().y() * m->diffuse_color(point).y(),
+		scene_.getAmbientLight().z() * m->diffuse_color(point).z())
+		;
 
 	// YOUR CODE HERE (R4 & R7)
 	// For R4, loop over all the lights in the scene and add their contributions to the answer.

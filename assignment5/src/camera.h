@@ -18,7 +18,16 @@ public:
 		// Given floating-point pixel coordinates (px,py), you should return the corresponding normalized screen coordinates in [-1,1]^2
 		// Pay attention to which direction is "up" :)
 
-		return Vector2f::Zero();
+		float x = pixel.x();
+		float y = pixel.y();
+
+		float imageX = 2.0f * (x / imageSize.x()) - 1.0f;
+		float imageY = 1.0f - 2.0f * (y / imageSize.y());
+
+		//cout << "x,y: (" << x << ", " << y << ") - image x,y: (" << imageX << ", " << imageY << ")" << endl;
+
+		return Vector2f(imageX, imageY);
+		//return Vector2f::Zero();
 	}
 	
     virtual float getTMin() const = 0;
@@ -68,7 +77,7 @@ public:
     {
 		// YOUR CODE HERE (R1)
 		// Generate a ray with the given screen coordinates, which you should assume lie in [-1,1]^2
-		return Ray(center, direction);
+		return Ray(center + (size * fAspect * horizontal * point.x())/2 + (size * up * point.y())/2, direction);
 	}
 
 	bool isOrtho() const override { return true; }
@@ -101,8 +110,16 @@ public:
 		// YOUR CODE HERE (R3)
 		// Generate a ray with the given screen coordinates, which you should assume lie in [-1,1]^2
 		// How to do this is described in the lecture notes.
+		float d = 1.0f/ tan(fov_y/2.0f);
 
-		return Ray(center, direction);
+		Vector3f newDirection =
+			(point.x() * horizontal * fAspect) +
+			(point.y() * up) +
+			direction * d;
+
+		newDirection.normalize();
+
+		return Ray(center, newDirection);
 	}
 
 	bool isOrtho() const override { return false; }
