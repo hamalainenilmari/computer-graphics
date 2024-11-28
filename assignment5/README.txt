@@ -19,9 +19,9 @@ Did you work on the assignment using Aalto computers, your own computers, or bot
 # and leave your 'attempt' code in place (commented out if necessary) so we can see it.
 
 R0 Displaying image coordinates       (0.5p): done
-R1 Generating rays & ambient lighting (1.5p): not done
-R2 Visualizing depth		          (  1p): not done
-R3 Perspective camera		          (1.5p): not done
+R1 Generating rays & ambient lighting (1.5p): done
+R2 Visualizing depth		          (  1p): done
+R3 Perspective camera		          (1.5p): done
 R4 Phong shading		      		  (  3p): not done
 R5 Plane intersection		          (  1p): not done
 R6 Triangle intersection	          (1.5p): not done
