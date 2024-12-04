@@ -92,6 +92,20 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// For R7, if args_.shadows is on, also shoot a shadow ray from the hit point to the light
 	// to confirm it isn't blocked; if it is, ignore the contribution of the light.
 
+	Vector3f difSum = Vector3f::Zero();
+	int lights = scene_.getNumLights();
+	for (int i = 0; i < lights; ++i) { // for every light in the scene
+		// For each light source, ask for the incident illumination with Light::getIncidentIllumination.
+		auto light = scene_.getLight(i);
+		Vector3f dir;// = Vector3f::Ones();
+		Vector3f intensity;// = Vector3f::Ones();
+		float dis = 1.0f;
+		light -> getIncidentIllumination(point, dir, intensity, dis);
+
+		Vector3f d = m->shade(ray, hit, dir, intensity, false);
+		difSum += d;
+	}
+
 	// are there bounces left?
 	if (bounces >= 1) {
 		// reflection, but only if reflective coefficient > 0!
@@ -116,5 +130,5 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			// REMEMBER you need to account for the possibility of total internal reflection as well.
 		}
 	}
-	return answer;
+	return answer + difSum;
 }

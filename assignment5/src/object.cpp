@@ -64,6 +64,16 @@ bool PlaneObject::intersect( const Ray& r, Hit& h, float tmin ) const {
 	// origin + direction * t = p(t)
 	// origin . normal + t * direction . normal = d;
 	// t = (d - origin . normal) / (direction . normal);
+	//auto D = normal_ * offset_;
+	const float t = (offset_ - r.origin.dot(normal_)) / (r.direction.dot(r.direction));
+	//const float t = -(offset_ + r.origin.dot(normal_)) / (r.direction.dot(r.direction));
+	if (h.t > t && t > tmin) {
+		Vector3f normal = r.pointAtParameter(t);
+		normal.normalize();
+		h.set(t, this->material(), normal);
+		return true;
+	}
+
 	return false;
 }
 
@@ -141,6 +151,32 @@ bool TriangleObject::intersect( const Ray& r, Hit& h, float tmin ) const
 	// YOUR CODE HERE (R6)
 	// Intersect the triangle with the ray!
 	// Again, pay attention to respecting tmin and h.t!
+	const Vector3f a = vertices_[0];
+	const Vector3f b = vertices_[1];
+	const Vector3f c = vertices_[2];
+
+	Matrix3f A; 
+	A <<
+		a.x() - b.x(), a.x() - c.x(), r.direction.x(),
+		a.y() - b.y(), a.y() - c.y(), r.direction.y(),
+		a.z() - b.z(), a.z() - c.z(), r.direction.z();
+
+	Matrix3f A1;
+	A1 <<
+		(a.x() - b.x()), (a.x() - c.x()), (a.x() - r.origin.x()),
+		(a.y() - b.y()), (a.y() - c.y()), (a.y() - r.origin.y()),
+		(a.z() - b.z()), (a.z() - c.z()), (a.z() - r.origin.z());
+
+	const float t = A1.determinant() / A.determinant();
+
+	if (h.t > t && t > tmin) {
+		//Vector3f normal = r.pointAtParameter(t);
+		Vector3f normal((b - a).cross(c - a));//.normalize();
+
+		normal.normalize();
+		h.set(t, this->material(), normal);
+		return true;
+	}
 	return false;
 }
 

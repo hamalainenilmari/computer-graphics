@@ -34,9 +34,28 @@ Vector3f PhongMaterial::shade(const Ray &ray, const Hit &hit,
 	// Remember, when computing the specular lobe, you shouldn't add
 	// anything if the light is below the local horizon!
 
-	Vector3f answer = Vector3f::Zero();
+	// remember shade back !!!
+	Vector3f normal = hit.normal;
+	if (shade_back && normal.dot(ray.direction) > 0 ) {
+		normal = -normal;
+	}
 
-	return answer;
+	float dot = dir_to_light.dot(normal);
+	float d = (dot > 0) ? dot : 0;
+
+	Vector3f point = ray.pointAtParameter(hit.t);
+	Vector3f dif = d * (incident_intensity.cwiseProduct(hit.material->diffuse_color(point))); // diffuse
+
+	// specular
+	auto lightNorm = dir_to_light.normalized();
+
+	Vector3f ri = lightNorm - 2 * (lightNorm.dot(normal) * normal);
+
+	float clamp2 = ray.direction.normalized().dot(ri);
+	float c2 = (clamp2 > 0) ? clamp2 : 0; // clamp to 0
+	auto Si = incident_intensity.cwiseProduct(specular_color_) * pow(c2,exponent_);
+
+	return dif + Si;
 }
 
 Vector3f ProceduralMaterial::diffuse_color(const Vector3f& point) const
