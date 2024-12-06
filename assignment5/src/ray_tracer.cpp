@@ -97,12 +97,10 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// For R7, if args_.shadows is on, also shoot a shadow ray from the hit point to the light
 	// to confirm it isn't blocked; if it is, ignore the contribution of the light.
 
-	//Vector3f difSum = Vector3f::Zero();
 	Vector3f dir;
 	Vector3f intensity;
 	float dis = 1.0f;
 	float eps = 0.0001;
-	Hit hit2;
 
 	int lights = scene_.getNumLights();
 	for (int i = 0; i < lights; ++i) { // for every light in the scene
@@ -113,10 +111,11 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 		
 		if (args_.shadows) {
 			Ray ray2(point, dir);
+			Hit hit2;
 			bool intersect2 = scene_.getGroup()->intersect(ray2, hit2, eps);
 
 			if (fabs(hit2.t - dis) < eps) { // nothing in between -> add color
-				Vector3f d = m->shade(ray, hit, dir, intensity, false);
+				Vector3f d = m->shade(ray, hit, dir, intensity, false); 
 				answer += d;
 			}
 		}
@@ -124,7 +123,6 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			Vector3f d = m->shade(ray, hit, dir, intensity, false);
 			answer += d;
 		}
-
 	}
 
 	// are there bounces left?
@@ -135,11 +133,12 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			// Generate and trace a reflected ray to the ideal mirror direction and add
 			// the contribution to the result. Remember to modulate the returned light
 			// by the reflective color of the material of the hit point.
-
+			
 			Vector3f reflectiveColor = m->reflective_color(point);
 
-			Ray mirrorRay(point, mirrorDirection(hit.normal, ray.direction));
-			answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, tmin + eps, bounces - 1, refr_index, hit2, debug_color));
+			Ray mirrorRay(point + eps * hit.normal, mirrorDirection(hit.normal, ray.direction));
+			answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, tmin + eps, bounces - 1, refr_index, hit, debug_color));
+			
 		}
 
 		// refraction, but only if surface is transparent!
