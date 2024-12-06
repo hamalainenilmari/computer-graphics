@@ -157,9 +157,9 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
         for (int i = 0; i < args.width; ++i)
         {
             // When working on R9, use these to accumulate the results before writing to the respective images
-            //Vector3f color = Vector3f::Zero();
-            //Vector3f normal_color = Vector3f::Zero();
-            //float depth_color = 0.0f;
+            Vector3f color = Vector3f::Zero();
+            Vector3f normal_color = Vector3f::Zero();
+            float depth_color = 0.0f;
             // Loop through all the samples for this pixel.
             for (int n = 0; n < args.samples_per_pixel; ++n)
             {
@@ -167,6 +167,7 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                 // You need to fill in the implementation for this function when implementing supersampling.
                 // The starter implementation only supports one sample per pixel through the pixel center.
                 Vector2f subpixel_offset = sampler->getSamplePosition(n);
+                //cout << "sampleposition of n: " << n << " = " << subpixel_offset.x() << ", " << subpixel_offset.y();
                 Vector2f pixel_coordinates = Vector2f(float(i), float(j)) + subpixel_offset;
 
                 // Convert floating-point pixel coordinate to canonical view coordinates in [-1,1]^2
@@ -209,13 +210,19 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                 // (so-called "box filtering"). Note that this starter code does not take an average,
                 // it just assumes the first and only sample is the final color.
 
+                color += sample_color;
+
                 // For extra credit, you can implement more sophisticated ones, such as "tent" and bicubic
                 // "Mitchell-Netravali" filters. This requires you to implement the addSample()
                 // function in the Film class and use it instead of directly setting pixel values in the image.
 
                 Vector4f s;
-                s << sample_color, 1.0f;
-                color_image->pixel(i, j) = s;
+                if (n == args.samples_per_pixel - 1) {
+                    color = color / args.samples_per_pixel;
+                    s << color, 1.0f;
+                    color_image->pixel(i, j) = s;
+                }
+            
                 if (depth_image)
                 {
                     // YOUR CODE HERE (R2)

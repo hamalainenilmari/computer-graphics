@@ -34,7 +34,11 @@ Vector3f mirrorDirection(const Vector3f& normal, const Vector3f& incoming) {
 	// YOUR CODE HERE (R8)
 	// Pay attention to the direction which things point towards, and that you only
 	// pass in normalized vectors.
-	return Vector3f::Zero();
+
+	auto lightNorm = incoming.normalized();
+	Vector3f mirrorDir = lightNorm - 2 * (lightNorm.dot(normal) * normal);
+
+	return mirrorDir;
 }
 
 bool transmittedDirection(const Vector3f& normal, const Vector3f& incoming, 
@@ -93,31 +97,32 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// For R7, if args_.shadows is on, also shoot a shadow ray from the hit point to the light
 	// to confirm it isn't blocked; if it is, ignore the contribution of the light.
 
-	Vector3f difSum = Vector3f::Zero();
+	//Vector3f difSum = Vector3f::Zero();
+	Vector3f dir;
+	Vector3f intensity;
+	float dis = 1.0f;
+	float eps = 0.0001;
+	Hit hit2;
+
 	int lights = scene_.getNumLights();
 	for (int i = 0; i < lights; ++i) { // for every light in the scene
 		// For each light source, ask for the incident illumination with Light::getIncidentIllumination.
 		auto light = scene_.getLight(i);
-		Vector3f dir;
-		Vector3f intensity;
-		float dis = 1.0f;
+		
 		light -> getIncidentIllumination(point, dir, intensity, dis);
 		
 		if (args_.shadows) {
 			Ray ray2(point, dir);
-			Hit hit2;
-
-			float eps = 0.0001;
 			bool intersect2 = scene_.getGroup()->intersect(ray2, hit2, eps);
 
 			if (fabs(hit2.t - dis) < eps) { // nothing in between -> add color
 				Vector3f d = m->shade(ray, hit, dir, intensity, false);
-				difSum += d;
+				answer += d;
 			}
 		}
 		else {
 			Vector3f d = m->shade(ray, hit, dir, intensity, false);
-			difSum += d;
+			answer += d;
 		}
 
 	}
@@ -130,6 +135,11 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			// Generate and trace a reflected ray to the ideal mirror direction and add
 			// the contribution to the result. Remember to modulate the returned light
 			// by the reflective color of the material of the hit point.
+
+			Vector3f reflectiveColor = m->reflective_color(point);
+
+			Ray mirrorRay(point, mirrorDirection(hit.normal, ray.direction));
+			answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, tmin + eps, bounces - 1, refr_index, hit2, debug_color));
 		}
 
 		// refraction, but only if surface is transparent!
@@ -146,5 +156,5 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			// REMEMBER you need to account for the possibility of total internal reflection as well.
 		}
 	}
-	return answer + difSum;
+	return answer;
 }

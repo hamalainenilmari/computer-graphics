@@ -59,7 +59,14 @@ Vector2f RegularSampler::getSamplePosition(int n)
 	// YOUR CODE HERE (R9)
 	// Return a sample through the center of the Nth subpixel.
 	// The starter code only supports one sample per pixel.
-	return Vector2f(0.5f, 0.5f);
+
+	int i = n / sqrt_n_;
+	int j = n % sqrt_n_;
+
+	float x = (j + 0.5f) / sqrt_n_; 
+	float y = (i + 0.5f) / sqrt_n_;
+
+	return Vector2f(x, y);
 }
 
 JitteredSampler::JitteredSampler(int num_samples, int random_seed) :
@@ -72,6 +79,14 @@ Vector2f JitteredSampler::getSamplePosition(int n)
 {
 	// YOUR CODE HERE (R9)
 	// Return a randomly generated sample through Nth subpixel.
-    return Vector2f(0.5, 0.5);
+	int i = n / sqrt_n_;
+	int j = n % sqrt_n_;
+
+	std::uniform_real_distribution<float> uniform_dist(-0.5f / sqrt_n_, 0.5f / sqrt_n_);
+	
+	float x = (j + 0.5f) / sqrt_n_ + uniform_dist(generator_);
+	float y = (i + 0.5f) / sqrt_n_ + uniform_dist(generator_);
+
+	return Vector2f(x, y);
 }
 
