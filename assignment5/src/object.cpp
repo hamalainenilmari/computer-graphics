@@ -65,12 +65,9 @@ bool PlaneObject::intersect( const Ray& r, Hit& h, float tmin ) const {
 	// origin . normal + t * direction . normal = d;
 	// t = (d - origin . normal) / (direction . normal);
 	//auto D = normal_ * offset_;
-	const float t = (offset_ - r.origin.dot(normal_)) / (r.direction.dot(r.direction));
-	//const float t = -(offset_ + r.origin.dot(normal_)) / (r.direction.dot(r.direction));
+	const float t = (offset_ - r.origin.dot(normal_)) / (r.direction.dot(normal_));
 	if (h.t > t && t > tmin) {
-		Vector3f normal = r.pointAtParameter(t);
-		normal.normalize();
-		h.set(t, this->material(), normal);
+		h.set(t, this->material(), normal_);
 		return true;
 	}
 
@@ -161,17 +158,33 @@ bool TriangleObject::intersect( const Ray& r, Hit& h, float tmin ) const
 		a.y() - b.y(), a.y() - c.y(), r.direction.y(),
 		a.z() - b.z(), a.z() - c.z(), r.direction.z();
 
-	Matrix3f A1;
-	A1 <<
+	Matrix3f At;
+	At <<
 		(a.x() - b.x()), (a.x() - c.x()), (a.x() - r.origin.x()),
 		(a.y() - b.y()), (a.y() - c.y()), (a.y() - r.origin.y()),
 		(a.z() - b.z()), (a.z() - c.z()), (a.z() - r.origin.z());
 
-	const float t = A1.determinant() / A.determinant();
+	Matrix3f Ab;
+	Ab <<
+		(a.x() - r.origin.x()), (a.x() - c.x()), (r.direction.x()),
+		(a.y() - r.origin.y()), (a.y() - c.y()), (r.direction.y()),
+		(a.z() - r.origin.z()), (a.z() - c.z()), (r.direction.z());
+
+	Matrix3f Ay;
+	Ay <<
+		(a.x() - b.x()), (a.x() - r.origin.x()), (r.direction.x()),
+		(a.y() - b.y()), (a.y() - r.origin.y()), (r.direction.y()),
+		(a.z() - b.z()), (a.z() - r.origin.z()), (r.direction.z());
+
+	const float t = At.determinant() / A.determinant();
+	const float baryB = Ab.determinant() / A.determinant();
+	const float baryY = Ay.determinant() / A.determinant();
+
+	if (baryB + baryY >= 1 || baryB <= 0 || baryY <= 0) { return false; };
 
 	if (h.t > t && t > tmin) {
 		//Vector3f normal = r.pointAtParameter(t);
-		Vector3f normal((b - a).cross(c - a));//.normalize();
+		Vector3f normal((b - a).cross(c - a));
 
 		normal.normalize();
 		h.set(t, this->material(), normal);

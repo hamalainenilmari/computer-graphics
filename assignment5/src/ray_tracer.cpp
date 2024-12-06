@@ -54,7 +54,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 {
 	// initialize a hit to infinitely far away
 	hit = Hit(FLT_MAX);
-
+	
 	// Ask the root node (the single "Group" in the scene) for an intersection.
 	bool intersect = false;
 	if(scene_.getGroup() != nullptr)
@@ -67,7 +67,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// if the ray missed, we return the background color.
 	if (!intersect)
 		return scene_.getBackgroundColor();
-	
+
 	const Material* m = hit.material.get();
 	assert(m != nullptr);
 
@@ -79,6 +79,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// Apply ambient lighting using the ambient light of the scene
 	// and the diffuse color of the material.
 	
+	// kd * ka
 	Vector3f answer = Vector3f(
 		scene_.getAmbientLight().x() * m->diffuse_color(point).x(),
 		scene_.getAmbientLight().y() * m->diffuse_color(point).y(),
@@ -97,13 +98,28 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	for (int i = 0; i < lights; ++i) { // for every light in the scene
 		// For each light source, ask for the incident illumination with Light::getIncidentIllumination.
 		auto light = scene_.getLight(i);
-		Vector3f dir;// = Vector3f::Ones();
-		Vector3f intensity;// = Vector3f::Ones();
+		Vector3f dir;
+		Vector3f intensity;
 		float dis = 1.0f;
 		light -> getIncidentIllumination(point, dir, intensity, dis);
+		
+		if (args_.shadows) {
+			Ray ray2(point, dir);
+			Hit hit2;
 
-		Vector3f d = m->shade(ray, hit, dir, intensity, false);
-		difSum += d;
+			float eps = 0.0001;
+			bool intersect2 = scene_.getGroup()->intersect(ray2, hit2, eps);
+
+			if (fabs(hit2.t - dis) < eps) { // nothing in between -> add color
+				Vector3f d = m->shade(ray, hit, dir, intensity, false);
+				difSum += d;
+			}
+		}
+		else {
+			Vector3f d = m->shade(ray, hit, dir, intensity, false);
+			difSum += d;
+		}
+
 	}
 
 	// are there bounces left?

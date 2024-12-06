@@ -54,6 +54,7 @@ void DirectionalLight::getIncidentIllumination(const Vector3f& p,
 	// distance does not matter
 	dir_to_light = -direction_;
 	incident_intensity = intensity_;
+	distance = FLT_MAX;
 
 }
 
@@ -81,9 +82,9 @@ void PointLight::getIncidentIllumination(const Vector3f& p,
 	//distance does matter
 	
 	float dist = (position_ - p).norm();
-	float f = 1 / (quadratic_attenuation_ * pow(dist,2) + linear_attenuation_ * dist + constant_attenuation_);
+	float f = (quadratic_attenuation_ * pow(dist,2) + linear_attenuation_ * dist + constant_attenuation_);
+	f = (f > 0) ? 1/f : 0;
 	distance = dist;
 	dir_to_light = (position_ - p).normalized();
-	incident_intensity = intensity_ / f;
-	
+	incident_intensity = intensity_ * f;
 }

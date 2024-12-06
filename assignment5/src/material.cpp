@@ -34,7 +34,6 @@ Vector3f PhongMaterial::shade(const Ray &ray, const Hit &hit,
 	// Remember, when computing the specular lobe, you shouldn't add
 	// anything if the light is below the local horizon!
 
-	// remember shade back !!!
 	Vector3f normal = hit.normal;
 	if (shade_back && normal.dot(ray.direction) > 0 ) {
 		normal = -normal;

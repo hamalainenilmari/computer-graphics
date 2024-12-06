@@ -111,14 +111,12 @@ public:
 		// Generate a ray with the given screen coordinates, which you should assume lie in [-1,1]^2
 		// How to do this is described in the lecture notes.
 		float d = 1.0f/ tan(fov_y/2.0f);
-
 		Vector3f newDirection =
 			(point.x() * horizontal * fAspect) +
 			(point.y() * up) +
 			direction * d;
 
 		newDirection.normalize();
-
 		return Ray(center, newDirection);
 	}
 
