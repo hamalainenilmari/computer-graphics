@@ -24,10 +24,7 @@ public:
 		float imageX = 2.0f * (x / imageSize.x()) - 1.0f;
 		float imageY = 1.0f - 2.0f * (y / imageSize.y());
 
-		//cout << "x,y: (" << x << ", " << y << ") - image x,y: (" << imageX << ", " << imageY << ")" << endl;
-
 		return Vector2f(imageX, imageY);
-		//return Vector2f::Zero();
 	}
 	
     virtual float getTMin() const = 0;
@@ -110,7 +107,7 @@ public:
 		// YOUR CODE HERE (R3)
 		// Generate a ray with the given screen coordinates, which you should assume lie in [-1,1]^2
 		// How to do this is described in the lecture notes.
-		float d = 1.0f/ tan(fov_y/2.0f);
+		float d = 1.0f / tan(fov_y / 2.0f);
 		Vector3f newDirection =
 			(point.x() * horizontal * fAspect) +
 			(point.y() * up) +

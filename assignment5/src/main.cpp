@@ -236,9 +236,12 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                     // YOUR CODE HERE (R2)
                     // Here you should linearly map the t range [depth_min, depth_max] to the inverted range [1,0] for visualization
                     // Note the inversion; closer objects should appear brighter.
-                   
+
+                    if (hitDepth.t > args.depth_max) { hitDepth.t = args.depth_max; }
+                    if (hitDepth.t < args.depth_min) { hitDepth.t = args.depth_min; }
 
                     float f = 1.0f - (hitDepth.t - args.depth_min) / (args.depth_max - args.depth_min);
+
                     if (f > 1.0) { f = 1.0f; }
                     if (f < 0) { f = 0.0f; }
                     
@@ -247,7 +250,7 @@ shared_ptr<Image4f> render(RayTracer& ray_tracer, SceneParser& scene, const Args
                 if (normal_image)
                 {
 
-                    // new ray for depth to get rid of reflections of rays
+                    // new ray for normal to get rid of reflections of rays
                     Ray rNormal = scene.getCamera()->generateRay(normalized_image_coordinates, fAspect);
 
                     Hit hitNormal;
