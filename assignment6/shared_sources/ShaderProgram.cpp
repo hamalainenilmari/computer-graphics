@@ -29,6 +29,7 @@
 
 #include "glad/gl_core_33.h"
 
+#include <iostream>
 #include <vector>
 #include <fmt/core.h>
 
@@ -112,6 +113,7 @@ GLuint ShaderProgram::createGLShader(GLenum type, const string& typeStr, const s
         string info;
         info.resize(infoLen);
         glGetShaderInfoLog(shader, infoLen, &infoLen, info.data());
+        std::cout << info << std::endl;
         throw(ShaderCompilationException(fmt::format("glCompileShader({}) failed!\n\n{}", typeStr, info)));
     }
 

@@ -687,7 +687,8 @@ void App::uploadToGPU(const filesystem::path& texturepath)
 			teximg.getSize()(0), teximg.getSize()(1),
 			0, GL_RGBA, GL_UNSIGNED_BYTE, teximg.data());
 
-		glGenerateTextureMipmap(name_id.second);
+		//glGenerateTextureMipmap(name_id.second);
+        glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
@@ -890,12 +891,13 @@ void App::compileShadowMapShader()
         FW_GL_SHADER_SOURCE(
             // FRAGMENT SHADER
             in float depthVarying;
+            out vec4 fragColor;
         void main()
         {
             // YOUR SHADOWS HERE
             // Just output the depth value you computed in the vertex shader. It'll go into the shadow
             // map texture.
-            gl_FragColor = vec4(depthVarying);
+            fragColor = vec4(depthVarying);
         }
         ));
 
