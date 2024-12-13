@@ -50,7 +50,28 @@ bool BoxObject::intersect(const Ray& r, Hit& h, float tmin) const {
 // YOUR CODE HERE (EXTRA)
 // Intersect the box with the ray!
 
-  return false;
+	float t_far = FLT_MAX;
+	float t_near = -FLT_MAX;
+	for (int i = 0; i < 3; ++i) { //x,y,z
+		float t1 = (min_[i] - r.origin[i]) / r.direction[i];
+		float t2 = (max_[i] - r.origin[i]) / r.direction[i];
+
+		if (t1 > t2) {
+			float tmp = t1;
+			t1 = t2;
+			t2 = tmp;
+		}
+
+		if (t_near < t1) t_near = t1;
+		if (t_far > t2) t_far = t2;
+
+		if (t_near > t_far) return false; 
+	}
+	if (t_near < tmin) return false; 
+
+	h.set(t_near, this->material(), h.normal); 
+	return true;
+
 }
 
 bool PlaneObject::intersect( const Ray& r, Hit& h, float tmin ) const {
@@ -91,7 +112,19 @@ bool TransformObject::intersect(const Ray& r, Hit& h, float tmin) const {
 	// recompute it!
 	// Remember how points, directions, and normals are transformed differently!
 
-	return false; 
+	Vector4f origin_os = inverse_ * Vector4f(r.origin(0), r.origin(1), r.origin(2), 1.0f);
+	Vector4f dir_os = inverse_ * Vector4f(r.direction(0), r.direction(1), r.direction(2), 0.0f);
+
+
+	Ray ray2(origin_os.head<3>(), dir_os.head<3>());
+	
+	bool intersection = object_->intersect(ray2, h, tmin);
+
+	Vector4f normal_h_back = inverse_transpose_ * Vector4f(h.normal(0), h.normal(1), h.normal(2), 0.0f);
+	if (intersection) h.set(h.t, h.material, normal_h_back.head<3>().normalized());
+
+	return intersection;
+	//return false; 
 }
 
 bool SphereObject::intersect( const Ray& r, Hit& h, float tmin ) const {

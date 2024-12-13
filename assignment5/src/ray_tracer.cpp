@@ -48,7 +48,12 @@ bool transmittedDirection(const Vector3f& normal, const Vector3f& incoming,
 	// and indices of refraction. Pay attention to the direction which things point towards!
 	// You should only pass in normalized vectors!
 	// The function should return true if the computation was successful, and false
-	// if the transmitted direction can't be computed due to total internal reflection.
+	// if the transmitted direction can't be computed due to total isnternal reflection.
+
+	float index_r = index_t / index_i;
+	float square = 1 - ((index_r * index_r) * (1 - (normal.dot(incoming) * normal.dot(incoming))));
+	if (square < 0) return false;
+	transmitted = (((index_r * normal.dot(incoming)) - sqrt(square)) * normal - index_r * incoming).normalized();
 	return true;
 }
 
@@ -99,7 +104,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 
 	Vector3f dir;
 	Vector3f intensity;
-	float dis = 1.0f;
+	float dis = 1.0f; //distance to light
 	float eps = 0.0001;
 
 	int lights = scene_.getNumLights();
@@ -110,12 +115,23 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 		light -> getIncidentIllumination(point, dir, intensity, dis);
 		
 		if (args_.shadows) {
-			Ray ray2(point, dir);
+			Ray ray2(point + eps * hit.normal, dir);
 			Hit hit2;
 			bool intersect2 = scene_.getGroup()->intersect(ray2, hit2, eps);
-
-			if (fabs(hit2.t - dis) < eps) { // nothing in between -> add color
-				Vector3f d = m->shade(ray, hit, dir, intensity, false); 
+			bool addShade = true;
+			if (intersect2) {
+				// ray has hit something
+				if (dis == FLT_MAX) {
+					// directional light -> automatic shadow
+					addShade = false;
+				}
+				else if (hit2.t < dis - eps) {
+					// pointlight -> intersection before light source
+					addShade = false;
+				}
+			}
+			if (addShade) {
+				Vector3f d = m->shade(ray, hit, dir, intensity, false);
 				answer += d;
 			}
 		}
@@ -128,6 +144,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 	// are there bounces left?
 	if (bounces >= 1) {
 		// reflection, but only if reflective coefficient > 0!
+		
 		if (m->reflective_color(point).norm() > 0.0f) {
 			// YOUR CODE HERE (R8)
 			// Generate and trace a reflected ray to the ideal mirror direction and add
@@ -137,7 +154,7 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			Vector3f reflectiveColor = m->reflective_color(point);
 
 			Ray mirrorRay(point + eps * hit.normal, mirrorDirection(hit.normal, ray.direction));
-			answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, tmin + eps, bounces - 1, refr_index, hit, debug_color));
+			answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, eps, bounces - 1, refr_index, hit, debug_color));
 			
 		}
 
@@ -153,6 +170,38 @@ Vector3f RayTracer::traceRay(Ray& ray, float tmin, int bounces, float refr_index
 			// should use the material's refractive index. Remember to modulate the result
 			// with the material's refractiveColor().
 			// REMEMBER you need to account for the possibility of total internal reflection as well.
+
+			Vector3f dir_t = Vector3f::Ones();
+			float index_i = 1.0f;
+			float index_t = m->refraction_index(point);
+			bool hasRefraction = false;
+			float newIndex;
+			if (/*ray.direction.dot(hit.normal) < 0.0f*/ refr_index == 1.0) {
+				// coming from vacuum to object
+
+				hasRefraction = transmittedDirection(hit.normal.normalized(), ray.direction.normalized(), index_i, index_t, dir_t);
+				newIndex = index_t;
+			}
+			else {
+				// coming from object to vacuum
+
+				hasRefraction = transmittedDirection(-hit.normal.normalized(), ray.direction.normalized(), index_t, index_i, dir_t);
+				newIndex = 1.0f;
+			}
+			// does not have total intenal reflection
+			if (hasRefraction) {
+				Ray refractedRay(point + eps * dir_t, dir_t);
+				Vector3f transColor = m->transparent_color(point);
+
+				answer += transColor.cwiseProduct(traceRay(refractedRay, eps, bounces - 1, newIndex, hit, debug_color));
+			}
+			else {
+				// has total internal reflection -> add the reflection
+				Vector3f reflectiveColor = m->reflective_color(point);
+
+				Ray mirrorRay(point + eps * hit.normal, mirrorDirection(hit.normal, ray.direction));
+				answer += reflectiveColor.cwiseProduct(traceRay(mirrorRay, eps, bounces - 1, refr_index, hit, debug_color));
+			}
 		}
 	}
 	return answer;

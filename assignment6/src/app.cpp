@@ -384,7 +384,7 @@ void App::render(int width, int height, vector<string>& vecStatusMessages)
         l.setPosition(l.getStaticPosition());
         l.setOrientation(getOrientation(-l.getPosition(), Vector3f(0.0f, 1.0f, 0.0f)));
     }
-
+        
 
 	if (m_shadows)
 	{
