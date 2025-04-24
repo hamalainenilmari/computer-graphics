@@ -1,0 +1,10 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "assignment1\\out\\build\\configure-vs2022",
+      "assignment1\\out\\build\\configure-xcode",
+      "assignment1\\out\\build\\Release",
+      "assignment1\\out\\build\\Debug"
+    ]
+  }
+}

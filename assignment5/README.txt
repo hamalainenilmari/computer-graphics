@@ -6,7 +6,7 @@
 Student name: Ilmari Hämäläinen
 Student number: 894931
 Hours spent on requirements (approx.): 18
-Hours spent on extra credit (approx.):
+Hours spent on extra credit (approx.): 6
 
 # First, a 10-second poll about this assignment period:
 
@@ -33,7 +33,17 @@ R9 Antialiasing			              (  2p): done
 
 (Describe what you did and, if there was a substantial amount of work involved, how you did it. Also describe how to use/activate your extra features, if they are interactive.)
 
-no
+!!!!!!!
+
+NEW EXTRA ASSIGNMENTS DONE  !
+In this extra submission, I have implementations of the extras for:
+- "Implement refraction through transparent objects. See handout and code comments around where reflection is implemented. For full points, make sure you handle total internal reflection situations. (1-2p)""
+in this, the reflection does not work perfectly.
+- "Add other types of simple primitives to your ray tracer, and extend the file format and parser if
+necessary. At least provide implementations for Transform and Box; there are skeletons for them
+in the base code. (3p)"
+
+!!!!!!!
 
 # Are there any known problems/bugs remaining in your code?
 
